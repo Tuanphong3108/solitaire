@@ -2,7 +2,7 @@
 "name": "Solitaire",
 "short_name": "Solitaire",
 "description": "Game Solitaire cổ điển với giao diện Material 3 hiện đại, chơi được offline.",
-"start_url": "solitaire_game.html",
+"start_url": "index.html",
 "display": "standalone",
 "orientation": "portrait",
 "background_color": "#1a1c20",
