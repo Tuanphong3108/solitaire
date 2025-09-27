@@ -4,19 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solitaire Độc Đáo</title>
+    <!-- Favicon cho bản Public -->
+    <link rel="icon" href="icon.png" type="image/png">
+    <!-- PWA Manifest Link -->
+    <link rel="manifest" href="manifest.json">
     <!-- Tải Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        /* --- M3 VIBE STYLING --- */
         :root {
             --card-width: 80px;
             --card-height: 120px;
-            --table-color: #1a472a; /* Màu xanh lá đậm của bàn */
+            /* Deep M3 Green/Navy for table */
+            --table-color: #1a1c20; 
+            --surface-color: #1E3A2C; /* Surface for card slots */
+            --primary-accent: #60c9ff; /* M3-like blue accent */
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d2817;
+            background-color: var(--table-color);
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -28,29 +36,29 @@
         .card, .card-slot {
             width: var(--card-width);
             height: var(--card-height);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+            border-radius: 12px; /* M3 rounded */
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4); /* Elevated shadow */
             transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
 
         /* Định dạng vùng chứa rỗng */
         .card-slot {
-            background-color: rgba(0, 0, 0, 0.15);
-            border: 2px dashed rgba(255, 255, 255, 0.2);
+            background-color: var(--surface-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: center;
             align-items: center;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.9rem;
-            text-shadow: 0 0 5px #000;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            font-weight: 600;
         }
 
         /* Định dạng lá bài */
         .card {
-            position: absolute; /* Quan trọng để xếp chồng */
-            background-color: white;
+            position: absolute;
+            background-color: #F8F9FA; /* Light surface */
             color: black;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: none;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -62,8 +70,9 @@
         }
 
         .card-back {
-            background-image: linear-gradient(135deg, #a73737 0%, #7a2020 100%);
-            color: white;
+            /* M3 dark card back */
+            background-image: linear-gradient(135deg, #004d40 0%, #002d28 100%);
+            color: #d7e8ff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -73,20 +82,14 @@
 
         /* Hiệu ứng cho lá bài được chọn */
         .card.selected {
-            outline: 3px solid #ffcc00;
-            box-shadow: 0 0 15px #ffcc00, 0 8px 10px rgba(0, 0, 0, 0.6);
+            outline: 3px solid var(--primary-accent);
+            box-shadow: 0 0 15px var(--primary-accent), 0 8px 15px rgba(0, 0, 0, 0.7);
             transform: translateY(-5px);
             z-index: 100;
         }
 
-        /* Hiệu ứng cho lá bài kéo (stack) */
-        .card-stack {
-            position: absolute;
-            z-index: 10;
-        }
-
-        /* Màu chất bài */
-        .red-suit { color: #cc3333; }
+        /* Màu chất bài (vẫn giữ độ tương phản cao) */
+        .red-suit { color: #d32f2f; }
         .black-suit { color: #1a1a1a; }
 
         /* Xếp chồng lá bài trong Tableau */
@@ -150,28 +153,26 @@
         </div>
         
         <!-- Bảng Điều Khiển & Thông Báo GỘP (Ở dưới cùng) -->
-        <div class="mt-8 p-4 bg-gray-900 rounded-xl shadow-2xl border border-gray-700">
+        <div class="mt-8 p-4 bg-[#20252b] rounded-xl shadow-2xl border border-gray-700">
             
             <!-- Hàng 1: Nút và Điểm -->
             <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-700">
                 <div class="flex space-x-4">
-                    <button onclick="initGame()" class="px-4 py-2 bg-yellow-500 text-gray-900 font-bold rounded-lg hover:bg-yellow-400 transition shadow-md transform hover:scale-[1.02]">
+                    <!-- Nút M3 Filled Button -->
+                    <button onclick="initGame()" class="px-5 py-2 bg-[var(--primary-accent)] text-gray-900 font-bold rounded-full hover:bg-[#86d9ff] transition shadow-md transform hover:scale-[1.05]">
                         CHƠI LẠI (New Game)
                     </button>
-                    <!-- Nút Gợi Ý Gemini API -->
-                    <button id="hint-button" onclick="getGeminiHint()" class="px-4 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-500 transition shadow-md flex items-center transform hover:scale-[1.02]">
-                        Gợi Ý Chiến Thuật ✨
-                    </button>
+                    
                 </div>
                 
                 <div id="score-box" class="text-white text-2xl font-extrabold tracking-wider">
-                    ĐIỂM: <span id="current-score" class="text-yellow-400">0</span>
+                    ĐIỂM: <span id="current-score" class="text-[var(--primary-accent)]">0</span>
                 </div>
             </div>
 
             <!-- Hàng 2: Thanh Thông báo -->
             <div class="pt-2">
-                <div id="message-box" class="text-yellow-300 text-center text-lg font-medium p-2 bg-gray-800 rounded-lg border border-gray-700 transition duration-300">
+                <div id="message-box" class="text-[var(--primary-accent)] text-center text-lg font-medium p-3 bg-[#1e2329] rounded-lg border border-gray-700 transition duration-300">
                     Sẵn sàng chiến đấu, Phong!
                 </div>
             </div>
@@ -182,7 +183,7 @@
             <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
                 <h3 id="modal-title" class="text-2xl font-extrabold mb-4 text-gray-800">Chúc Mừng Chiến Thắng!</h3>
                 <p id="modal-content" class="mb-6 text-gray-600">Bạn đã hoàn thành trò chơi Solitaire!</p>
-                <button onclick="hideModal(); initGame();" class="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-500 transition shadow-lg">
+                <button onclick="hideModal(); initGame();" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full hover:bg-red-500 transition shadow-lg">
                     Chơi Ván Mới
                 </button>
             </div>
@@ -191,10 +192,7 @@
     </div>
 
     <script>
-        // --- 1. FIREBASE SETUP & GLOBAL UTILITIES ---
-        // Không cần Firebase cho Solitaire (Single Player) nên ta bỏ qua phần auth và db setup
-
-        // --- 2. GAME CONSTANTS & DATA STRUCTURES ---
+        // --- 1. GAME CONSTANTS & DATA STRUCTURES ---
 
         const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
         const RANK_VALUES = {'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13};
@@ -214,7 +212,7 @@
         let selectedPileIndex = -1; // Index cọc bài được chọn (0-6 cho tableau)
         let score = 0;
 
-        // --- 3. CARD CLASS (Lớp Lá Bài) ---
+        // --- 2. CARD CLASS (Lớp Lá Bài) ---
 
         class Card {
             constructor(rank, suit) {
@@ -240,7 +238,7 @@
             }
         }
 
-        // --- 4. GAME LOGIC FUNCTIONS ---
+        // --- 3. GAME LOGIC FUNCTIONS ---
 
         // Trộn bài (Thuật toán Fisher-Yates)
         function shuffle(deck) {
@@ -279,12 +277,12 @@
             }
             
             msgBox.textContent = msg;
-            msgBox.classList.add('text-yellow-300');
+            msgBox.classList.add('text-[var(--primary-accent)]');
             
             // 2. Đặt timeout mới và lưu ID
             messageTimeoutId = setTimeout(() => {
                 msgBox.textContent = 'Tiếp tục chiến nào!';
-                msgBox.classList.remove('text-yellow-300');
+                msgBox.classList.remove('text-[var(--primary-accent)]');
                 messageTimeoutId = null; // Đặt lại null sau khi hoàn thành
             }, 10000); // Thời gian chờ 10 giây (10000ms)
         }
@@ -315,7 +313,7 @@
         }
 
 
-        // --- 5. INITIALIZATION (Khởi Tạo Game) ---
+        // --- 4. INITIALIZATION (Khởi Tạo Game) ---
 
         function initGame() {
             // 1. Tạo và trộn bài
@@ -348,7 +346,7 @@
             renderGame();
         }
 
-        // --- 6. RENDERING (Vẽ Lại Giao Diện) ---
+        // --- 5. RENDERING (Vẽ Lại Giao Diện) ---
 
         function createCardElement(card, pileType, pileIndex, cardIndex) {
             const cardEl = document.createElement('div');
@@ -443,7 +441,7 @@
             checkWinCondition();
         }
 
-        // --- 7. MOVE LOGIC (Xử Lý Luật Chơi) ---
+        // --- 6. MOVE LOGIC (Xử Lý Luật Chơi) ---
         
         // Reset trạng thái chọn
         function resetSelection() {
@@ -699,142 +697,18 @@
                 renderGame();
             });
         });
-
-        // --- 8. GEMINI API INTEGRATION (Gợi Ý Chiến Thuật) ---
-
-        const GEMINI_MODEL = "gemini-2.5-flash-preview-05-20";
-        // =========================================================================================
-        // IMPORTANT: API KEY MANAGEMENT
-        // When running on Canvas, the key is provided automatically.
-        // If you download this file and run it locally, paste your actual Gemini API Key here:
-        // const API_KEY = "PASTE_YOUR_SECRET_KEY_HERE"; 
-        // DO NOT COMMIT YOUR REAL KEY TO A PUBLIC GITHUB REPOSITORY! Delete it before pushing.
-        const API_KEY = "AIzaSyA4SZVhCNPYE4N1EXVgSGYIDL-UHpkSZOU"; 
-        // =========================================================================================
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
         
-        // Chuyển trạng thái game thành chuỗi text dễ hiểu cho LLM
-        function serializeGameState() {
-            let state = `Tình trạng ván Solitaire hiện tại (Klondike):\n\n`;
-
-            // 1. Waste (Bài đã lật)
-            const wasteCard = gamePiles.waste.length > 0 ? gamePiles.waste[gamePiles.waste.length - 1].toString() : 'Trống';
-            state += `Waste (Bài đã lật): ${wasteCard} (lá trên cùng)\n`;
-
-            // 2. Stock (Bài rút)
-            state += `Stock (Số lá còn lại): ${gamePiles.stock.length}\n`;
-
-            // 3. Foundations (4 Cọc Mục Tiêu)
-            state += `Foundations (Mục tiêu - lá trên cùng):\n`;
-            for (const suit in gamePiles.foundations) {
-                const card = gamePiles.foundations[suit].length > 0 ? gamePiles.foundations[suit][gamePiles.foundations[suit].length - 1].toString() : 'Trống';
-                state += `  ${SUIT_SYMBOLS[suit]}: ${card}\n`;
-            }
-
-            // 4. Tableau (7 Cọc Chính)
-            state += `\nTableau (7 Cọc Chính):\n`;
-            gamePiles.tableau.forEach((pile, index) => {
-                const faceUpCards = pile.filter(c => c.isFaceUp);
-                const faceDownCount = pile.length - faceUpCards.length;
-                let pileContent = '';
-
-                if (faceUpCards.length > 0) {
-                    pileContent = faceUpCards.map(c => c.toString()).join(', ');
-                    pileContent = `[${pileContent}]`;
-                } else if (pile.length === 0) {
-                    pileContent = 'Cọc trống';
-                } else {
-                    pileContent = 'Toàn bộ úp';
-                }
-                
-                state += `  Cọc ${index + 1} (${faceDownCount} lá úp): ${pileContent}\n`;
-            });
-
-            const userQuery = `Dựa trên trạng thái trò chơi trên, hãy phân tích nhanh và đưa ra MỘT GỢI Ý CHIẾN THUẬT tốt nhất tiếp theo để tối ưu hóa ván bài (ví dụ: "Di chuyển 7♠ từ Cọc 3 lên 8♥ ở Cọc 1" hoặc "Rút bài từ Stock để tìm quân bài mới"). Giữ gợi ý ngắn gọn và chỉ tập trung vào nước đi tối ưu nhất.`;
-            
-            return {
-                system: "Bạn là một Chuyên gia Solitaire (Klondike) huyền thoại. Nhiệm vụ của bạn là phân tích trạng thái bàn chơi và đưa ra gợi ý nước đi tối ưu nhất cho người chơi. Phản hồi của bạn phải ngắn gọn, súc tích, và chỉ tập trung vào chiến thuật.",
-                query: state + "\n\n" + userQuery
-            };
-        }
-
-        async function fetchGemini(payload) {
-            let attempt = 0;
-            const maxRetries = 3;
-            let lastError = null;
-
-            // Kiểm tra key trước khi gọi API nếu không chạy trong môi trường Canvas
-            if (API_KEY === "" && typeof __initial_auth_token === 'undefined') {
-                showMessage("Lỗi Key: Vui lòng dán Key API của bạn vào file HTML (mục 8) để bật gợi ý AI.");
-                return null;
-            }
-
-            while (attempt < maxRetries) {
-                const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-                if (attempt > 0) await new Promise(resolve => setTimeout(resolve, delay));
-
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+        // --- 7. PWA Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker đã đăng ký thành công:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Đăng ký Service Worker thất bại:', error);
                     });
-
-                    if (!response.ok) {
-                        throw new Error(`API failed with status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    
-                    if (text) {
-                        return text;
-                    } else {
-                        throw new Error('Received empty response from Gemini.');
-                    }
-                } catch (error) {
-                    lastError = error;
-                    attempt++;
-                }
-            }
-            console.error(`Failed to fetch from Gemini after ${maxRetries} attempts. Last error: ${lastError.message}`);
-            throw new Error(`Thất bại khi gọi API. Key có thể không hợp lệ hoặc đã hết Rate Limit.`);
-        }
-
-
-        async function getGeminiHint() {
-            const hintButton = document.getElementById('hint-button');
-            const originalText = hintButton.innerHTML;
-
-            // 1. Cập nhật UI loading
-            hintButton.disabled = true;
-            hintButton.innerHTML = '✨ Đang phân tích...';
-            showMessage('Chuyên gia AI đang phân tích bàn chơi...');
-
-            try {
-                // 2. Chuẩn bị payload
-                const gameState = serializeGameState();
-                const payload = {
-                    contents: [{ parts: [{ text: gameState.query }] }],
-                    systemInstruction: { parts: [{ text: gameState.system }] },
-                    // Không cần grounding vì đây là phân tích logic game
-                };
-
-                // 3. Gọi API
-                const hint = await fetchGemini(payload);
-                if (!hint) return;
-
-                // 4. Hiển thị gợi ý
-                showMessage(`✨ Gợi Ý AI: ${hint}`);
-
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                showMessage(error.message);
-            } finally {
-                // 5. Reset UI
-                hintButton.disabled = false;
-                hintButton.innerHTML = originalText;
-            }
+            });
         }
         
         // Bắt đầu game khi tải trang
