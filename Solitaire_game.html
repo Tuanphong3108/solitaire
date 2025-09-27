@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solitaire Độc Đáo</title>
+    <!-- Tải Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --card-width: 80px;
+            --card-height: 120px;
+            --table-color: #1a472a; /* Màu xanh lá đậm của bàn */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d2817;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Định dạng chung cho lá bài và vùng chứa */
+        .card, .card-slot {
+            width: var(--card-width);
+            height: var(--card-height);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        /* Định dạng vùng chứa rỗng */
+        .card-slot {
+            background-color: rgba(0, 0, 0, 0.15);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            text-shadow: 0 0 5px #000;
+        }
+
+        /* Định dạng lá bài */
+        .card {
+            position: absolute; /* Quan trọng để xếp chồng */
+            background-color: white;
+            color: black;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            font-weight: 800;
+            user-select: none;
+        }
+
+        .card-back {
+            background-image: linear-gradient(135deg, #a73737 0%, #7a2020 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        /* Hiệu ứng cho lá bài được chọn */
+        .card.selected {
+            outline: 3px solid #ffcc00;
+            box-shadow: 0 0 15px #ffcc00, 0 8px 10px rgba(0, 0, 0, 0.6);
+            transform: translateY(-5px);
+            z-index: 100;
+        }
+
+        /* Hiệu ứng cho lá bài kéo (stack) */
+        .card-stack {
+            position: absolute;
+            z-index: 10;
+        }
+
+        /* Màu chất bài */
+        .red-suit { color: #cc3333; }
+        .black-suit { color: #1a1a1a; }
+
+        /* Xếp chồng lá bài trong Tableau */
+        .tableau-pile > .card {
+            top: 0;
+            left: 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            :root {
+                --card-width: 65px;
+                --card-height: 95px;
+            }
+            body {
+                padding: 10px;
+            }
+            .card-slot {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[var(--table-color)]">
+
+    <div id="game-container" class="w-full max-w-6xl p-4 bg-transparent rounded-xl">
+        
+        <!-- Hàng Trên: Stock, Waste, Foundation -->
+        <div id="top-row" class="flex justify-between mb-8">
+            
+            <!-- Stock và Waste (Cọc Rút Bài và Bài Đã Lật) -->
+            <div class="flex space-x-4">
+                <div id="stock-slot" class="card-slot cursor-pointer flex-shrink-0" onclick="drawCard()">
+                    <span id="stock-count">STOCK</span>
+                </div>
+                <div id="waste-slot" class="card-slot relative flex-shrink-0">
+                    WASTE
+                </div>
+            </div>
+
+            <!-- Foundation (4 Cọc Mục Tiêu) -->
+            <div id="foundation-area" class="flex space-x-4">
+                <!-- 4 vùng chứa Foundation -->
+                <div id="foundation-H" class="foundation-slot card-slot relative" data-suit="H">CƠ</div>
+                <div id="foundation-D" class="foundation-slot card-slot relative" data-suit="D">RÔ</div>
+                <div id="foundation-C" class="foundation-slot card-slot relative" data-suit="C">CHUỒN</div>
+                <div id="foundation-S" class="foundation-slot card-slot relative" data-suit="S">BÍCH</div>
+            </div>
+        </div>
+
+        <!-- Tableau (7 Cột Chơi Chính) -->
+        <div id="tableau-area" class="flex justify-between space-x-2">
+            <!-- 7 vùng chứa Tableau -->
+            <div id="tableau-0" class="tableau-slot card-slot relative flex-1 min-h-[300px]"></div>
+            <div id="tableau-1" class="tableau-slot card-slot relative flex-1 min-h-[300px]"></div>
+            <div id="tableau-2" class="tableau-slot card-slot relative flex-1 min-h-[300px]"></div>
+            <div id="tableau-3" class="tableau-slot card-slot relative flex-1 min-h-[300px]"></div>
+            <div id="tableau-4" class="tableau-slot card-slot relative flex-1 min-h-[300px]"></div>
+            <div id="tableau-5" class="tableau-slot card-slot relative flex-1 min-h-[300px]"></div>
+            <div id="tableau-6" class="tableau-slot card-slot relative flex-1 min-h-[300px]"></div>
+        </div>
+        
+        <!-- Bảng Điều Khiển & Thông Báo GỘP (Ở dưới cùng) -->
+        <div class="mt-8 p-4 bg-gray-900 rounded-xl shadow-2xl border border-gray-700">
+            
+            <!-- Hàng 1: Nút và Điểm -->
+            <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-700">
+                <div class="flex space-x-4">
+                    <button onclick="initGame()" class="px-4 py-2 bg-yellow-500 text-gray-900 font-bold rounded-lg hover:bg-yellow-400 transition shadow-md transform hover:scale-[1.02]">
+                        CHƠI LẠI (New Game)
+                    </button>
+                    <!-- Nút Gợi Ý Gemini API -->
+                    <button id="hint-button" onclick="getGeminiHint()" class="px-4 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-500 transition shadow-md flex items-center transform hover:scale-[1.02]">
+                        Gợi Ý Chiến Thuật ✨
+                    </button>
+                </div>
+                
+                <div id="score-box" class="text-white text-2xl font-extrabold tracking-wider">
+                    ĐIỂM: <span id="current-score" class="text-yellow-400">0</span>
+                </div>
+            </div>
+
+            <!-- Hàng 2: Thanh Thông báo -->
+            <div class="pt-2">
+                <div id="message-box" class="text-yellow-300 text-center text-lg font-medium p-2 bg-gray-800 rounded-lg border border-gray-700 transition duration-300">
+                    Sẵn sàng chiến đấu, Phong!
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Modal for Win/Error Messages -->
+        <div id="game-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[1000]">
+            <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
+                <h3 id="modal-title" class="text-2xl font-extrabold mb-4 text-gray-800">Chúc Mừng Chiến Thắng!</h3>
+                <p id="modal-content" class="mb-6 text-gray-600">Bạn đã hoàn thành trò chơi Solitaire!</p>
+                <button onclick="hideModal(); initGame();" class="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-500 transition shadow-lg">
+                    Chơi Ván Mới
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. FIREBASE SETUP & GLOBAL UTILITIES ---
+        // Không cần Firebase cho Solitaire (Single Player) nên ta bỏ qua phần auth và db setup
+
+        // --- 2. GAME CONSTANTS & DATA STRUCTURES ---
+
+        const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const RANK_VALUES = {'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13};
+        const SUITS = ['H', 'D', 'C', 'S']; // Hearts (Cơ), Diamonds (Rô), Clubs (Chuồn), Spades (Bích)
+        const SUIT_SYMBOLS = {'H': '♥', 'D': '♦', 'C': '♣', 'S': '♠'};
+
+        // Trạng thái game (Các cọc bài)
+        let gamePiles = {
+            stock: [],    // Bài rút
+            waste: [],    // Bài đã lật
+            foundations: {'H': [], 'D': [], 'C': [], 'S': []}, // 4 cọc mục tiêu
+            tableau: [[], [], [], [], [], [], []] // 7 cọc chơi chính
+        };
+
+        let selectedCardIndex = -1; // Index lá bài được chọn trong cọc
+        let selectedPileType = null; // 'tableau', 'waste', hoặc 'foundation'
+        let selectedPileIndex = -1; // Index cọc bài được chọn (0-6 cho tableau)
+        let score = 0;
+
+        // --- 3. CARD CLASS (Lớp Lá Bài) ---
+
+        class Card {
+            constructor(rank, suit) {
+                this.rank = rank;
+                this.suit = suit;
+                this.isFaceUp = false;
+            }
+
+            isRed() {
+                return this.suit === 'H' || this.suit === 'D';
+            }
+
+            getColor() {
+                return this.isRed() ? 'red-suit' : 'black-suit';
+            }
+
+            getValue() {
+                return RANK_VALUES[this.rank];
+            }
+
+            toString() {
+                return this.rank + SUIT_SYMBOLS[this.suit];
+            }
+        }
+
+        // --- 4. GAME LOGIC FUNCTIONS ---
+
+        // Trộn bài (Thuật toán Fisher-Yates)
+        function shuffle(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        // Tạo bộ bài 52 lá
+        function createDeck() {
+            const deck = [];
+            for (const suit of SUITS) {
+                for (const rank of RANKS) {
+                    deck.push(new Card(rank, suit));
+                }
+            }
+            return deck;
+        }
+        
+        // Cập nhật điểm
+        function updateScore(points) {
+            score += points;
+            document.getElementById('current-score').textContent = score;
+        }
+        
+        let messageTimeoutId = null; // Biến toàn cục để quản lý timeout
+
+        // Hiển thị thông báo (không dùng alert)
+        function showMessage(msg) {
+            const msgBox = document.getElementById('message-box');
+            
+            // 1. Xóa timeout cũ nếu đang chạy để ngăn thông báo cũ chèn lên
+            if (messageTimeoutId) {
+                clearTimeout(messageTimeoutId);
+            }
+            
+            msgBox.textContent = msg;
+            msgBox.classList.add('text-yellow-300');
+            
+            // 2. Đặt timeout mới và lưu ID
+            messageTimeoutId = setTimeout(() => {
+                msgBox.textContent = 'Tiếp tục chiến nào!';
+                msgBox.classList.remove('text-yellow-300');
+                messageTimeoutId = null; // Đặt lại null sau khi hoàn thành
+            }, 10000); // Thời gian chờ 10 giây (10000ms)
+        }
+
+        function showModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').textContent = content;
+            document.getElementById('game-modal').classList.remove('hidden');
+        }
+
+        function hideModal() {
+            document.getElementById('game-modal').classList.add('hidden');
+        }
+
+
+        // Kiểm tra điều kiện thắng
+        function checkWinCondition() {
+            let totalFoundationCards = 0;
+            for (const suit in gamePiles.foundations) {
+                totalFoundationCards += gamePiles.foundations[suit].length;
+            }
+
+            if (totalFoundationCards === 52) {
+                showModal("CHIẾN THẮNG LỊCH SỬ!", `Chúc mừng Phong, bạn đã giải Solitaire với số điểm là ${score}!`);
+                return true;
+            }
+            return false;
+        }
+
+
+        // --- 5. INITIALIZATION (Khởi Tạo Game) ---
+
+        function initGame() {
+            // 1. Tạo và trộn bài
+            const deck = createDeck();
+            shuffle(deck);
+
+            // 2. Reset trạng thái
+            gamePiles.stock = deck;
+            gamePiles.waste = [];
+            gamePiles.foundations = {'H': [], 'D': [], 'C': [], 'S': []};
+            gamePiles.tableau = [[], [], [], [], [], [], []];
+            score = 0;
+            document.getElementById('current-score').textContent = 0;
+            showMessage('Bắt đầu ván mới! Chúc may mắn.');
+            resetSelection();
+            
+            // 3. Chia bài vào Tableau
+            for (let i = 0; i < 7; i++) {
+                for (let j = i; j < 7; j++) {
+                    const card = gamePiles.stock.pop();
+                    // Lật ngửa lá cuối cùng của mỗi cọc
+                    if (i === j) {
+                        card.isFaceUp = true;
+                    }
+                    gamePiles.tableau[j].push(card);
+                }
+            }
+            
+            // 4. Render Game
+            renderGame();
+        }
+
+        // --- 6. RENDERING (Vẽ Lại Giao Diện) ---
+
+        function createCardElement(card, pileType, pileIndex, cardIndex) {
+            const cardEl = document.createElement('div');
+            cardEl.classList.add('card');
+            
+            // Thêm data-attributes để xử lý click
+            cardEl.setAttribute('data-pile-type', pileType);
+            cardEl.setAttribute('data-pile-index', pileIndex);
+            cardEl.setAttribute('data-card-index', cardIndex);
+            
+            if (card.isFaceUp) {
+                cardEl.classList.add(card.getColor());
+                cardEl.innerHTML = `
+                    <div class="text-xl">${card.rank}</div>
+                    <div class="text-3xl">${SUIT_SYMBOLS[card.suit]}</div>
+                    <div class="text-xl self-end transform rotate-180">${card.rank}</div>
+                `;
+            } else {
+                cardEl.classList.add('card-back');
+                cardEl.textContent = '🃏';
+            }
+
+            // Xử lý sự kiện click
+            cardEl.onclick = (e) => handleCardClick(e, pileType, pileIndex, cardIndex, card);
+            
+            return cardEl;
+        }
+        
+        function renderPile(pile, elementId, pileType, pileIndex) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = ''; // Xóa nội dung cũ
+            
+            if (pile.length === 0) {
+                // Đảm bảo slot rỗng vẫn hiện diện
+                container.classList.add('card-slot');
+                return;
+            }
+            container.classList.remove('card-slot');
+            container.style.position = 'relative';
+
+            // Tạo và render từng lá bài
+            pile.forEach((card, index) => {
+                const cardEl = createCardElement(card, pileType, pileIndex, index);
+                
+                // Vị trí xếp chồng (chỉ áp dụng cho Tableau)
+                if (pileType === 'tableau') {
+                    const offset = index * 25; // Khoảng cách offset
+                    cardEl.style.transform = `translateY(${offset}px)`;
+                    cardEl.style.zIndex = index;
+                    
+                    // Thêm lớp nếu là card đã chọn (và tất cả các card phía dưới nó)
+                    if (selectedPileType === 'tableau' && selectedPileIndex === pileIndex && index >= selectedCardIndex) {
+                        cardEl.classList.add('selected');
+                    }
+                } else {
+                    // Waste/Foundation: chỉ hiển thị lá trên cùng
+                    cardEl.style.position = 'relative'; 
+                }
+
+                // Nếu là Waste/Foundation, chỉ hiển thị lá cuối cùng (top card)
+                if (pileType !== 'tableau' && index < pile.length - 1) {
+                    cardEl.style.display = 'none';
+                }
+
+                container.appendChild(cardEl);
+            });
+        }
+        
+        function renderGame() {
+            // Render Stock (Cập nhật số lượng)
+            document.getElementById('stock-count').textContent = gamePiles.stock.length > 0 ? gamePiles.stock.length : '♻️';
+            if (gamePiles.stock.length === 0) {
+                document.getElementById('stock-slot').classList.add('bg-gray-700', 'text-white');
+            } else {
+                document.getElementById('stock-slot').classList.remove('bg-gray-700', 'text-white');
+            }
+
+            // Render Waste
+            renderPile(gamePiles.waste, 'waste-slot', 'waste', 0);
+            
+            // Render Foundations
+            for (const suit of SUITS) {
+                renderPile(gamePiles.foundations[suit], `foundation-${suit}`, 'foundation', suit);
+            }
+
+            // Render Tableau
+            gamePiles.tableau.forEach((pile, index) => {
+                renderPile(pile, `tableau-${index}`, 'tableau', index);
+            });
+
+            // Sau khi render, kiểm tra điều kiện thắng
+            checkWinCondition();
+        }
+
+        // --- 7. MOVE LOGIC (Xử Lý Luật Chơi) ---
+        
+        // Reset trạng thái chọn
+        function resetSelection() {
+            if (selectedPileType) {
+                // Bỏ highlight cho các lá bài đã chọn
+                document.querySelectorAll('.card.selected').forEach(el => el.classList.remove('selected'));
+            }
+            selectedCardIndex = -1;
+            selectedPileType = null;
+            selectedPileIndex = -1;
+        }
+
+        // Hàm xử lý khi người chơi rút bài từ Stock
+        function drawCard() {
+            // 1. Kiểm tra nếu có bài trong Stock
+            if (gamePiles.stock.length > 0) {
+                const card = gamePiles.stock.pop();
+                card.isFaceUp = true;
+                gamePiles.waste.push(card);
+                updateScore(5); // Điểm khi rút bài lần đầu
+            } 
+            // 2. Nếu Stock rỗng, chuyển Waste về lại Stock
+            else if (gamePiles.waste.length > 0) {
+                while (gamePiles.waste.length > 0) {
+                    const card = gamePiles.waste.pop();
+                    card.isFaceUp = false; // Lật úp lại
+                    gamePiles.stock.push(card);
+                }
+                updateScore(-10); // Phạt khi tái chế bài
+                showMessage('Stock hết bài! Đã tái chế bài.');
+            } else {
+                 showMessage('Không còn bài để rút!');
+            }
+            resetSelection();
+            renderGame();
+        }
+
+        // Hàm kiểm tra tính hợp lệ của nước đi Tableau -> Tableau
+        function isValidTableauMove(targetPile, movedCards) {
+            if (targetPile.length === 0) {
+                // Nếu cọc trống, chỉ được đặt Vua (K)
+                return movedCards[0].rank === 'K';
+            }
+            
+            const targetCard = targetPile[targetPile.length - 1];
+            const movingCard = movedCards[0];
+
+            // 1. Phải khác màu
+            const colorMatch = movingCard.isRed() !== targetCard.isRed();
+            // 2. Rank phải nhỏ hơn 1 đơn vị
+            const rankMatch = movingCard.getValue() === targetCard.getValue() - 1;
+
+            return colorMatch && rankMatch;
+        }
+
+        // Hàm kiểm tra tính hợp lệ của nước đi X -> Foundation
+        function isValidFoundationMove(foundationPile, card) {
+            // Cọc Foundation rỗng: Chỉ được đặt Át (A)
+            if (foundationPile.length === 0) {
+                return card.rank === 'A';
+            }
+            
+            const topCard = foundationPile[foundationPile.length - 1];
+
+            // 1. Phải cùng chất
+            const suitMatch = card.suit === topCard.suit;
+            // 2. Rank phải lớn hơn 1 đơn vị
+            const rankMatch = card.getValue() === topCard.getValue() + 1;
+
+            return suitMatch && rankMatch;
+        }
+
+
+        // Hàm xử lý sự kiện click vào lá bài hoặc vùng chứa rỗng
+        function handleCardClick(e, type, index, cardIndex, card) {
+            e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+            
+            // 1. Lần Click Đầu Tiên: Chọn Bài
+            if (selectedPileType === null) {
+                
+                if (type === 'tableau' && card.isFaceUp) {
+                    // Chọn một stack trong Tableau
+                    selectedCardIndex = cardIndex;
+                    selectedPileType = type;
+                    selectedPileIndex = index;
+                    document.querySelectorAll('.card').forEach(el => el.classList.remove('selected'));
+                    // Highlight tất cả các lá từ cardIndex trở lên
+                    document.querySelectorAll(`[data-pile-type="tableau"][data-pile-index="${index}"]`).forEach(el => {
+                        if (parseInt(el.getAttribute('data-card-index')) >= cardIndex) {
+                            el.classList.add('selected');
+                        }
+                    });
+                    showMessage(`Đã chọn lá ${card.toString()}.`);
+                    return;
+                } 
+                
+                else if (type === 'waste' && cardIndex === gamePiles.waste.length - 1) {
+                    // Chỉ chọn lá trên cùng của Waste
+                    selectedCardIndex = cardIndex;
+                    selectedPileType = type;
+                    selectedPileIndex = index;
+                    e.currentTarget.classList.add('selected');
+                    showMessage(`Đã chọn lá ${card.toString()} từ Waste.`);
+                    return;
+                }
+                
+                else if (type === 'foundation' && cardIndex === gamePiles.foundations[index].length - 1) {
+                    // Không cho phép chọn từ Foundation
+                    showMessage('Không được di chuyển bài ra khỏi Foundation!');
+                    return;
+                }
+                
+                else {
+                    // Bỏ qua nếu là bài úp hoặc không phải lá trên cùng
+                    return;
+                }
+            } 
+            
+            // 2. Lần Click Thứ Hai: Di Chuyển Bài (Target)
+            else {
+                // Lấy các lá bài đang được chọn
+                let sourcePile;
+                let movedCards;
+                let scorePoints = 0;
+
+                if (selectedPileType === 'waste') {
+                    sourcePile = gamePiles.waste;
+                    movedCards = [sourcePile[sourcePile.length - 1]];
+                } else if (selectedPileType === 'tableau') {
+                    sourcePile = gamePiles.tableau[selectedPileIndex];
+                    movedCards = sourcePile.slice(selectedCardIndex);
+                } else {
+                    // Trường hợp này không nên xảy ra
+                    resetSelection();
+                    renderGame();
+                    return;
+                }
+
+                let moveSuccessful = false;
+
+                // THAY ĐỔI CỌC ĐÍCH: Tableau
+                if (type === 'tableau') {
+                    const targetPile = gamePiles.tableau[index];
+                    if (isValidTableauMove(targetPile, movedCards)) {
+                        targetPile.push(...movedCards);
+                        // Xóa các lá đã di chuyển khỏi cọc nguồn
+                        sourcePile.splice(selectedCardIndex);
+                        moveSuccessful = true;
+                        
+                        // Tính điểm: Waste/Foundation -> Tableau (+5), Tableau -> Tableau (0)
+                        if (selectedPileType === 'waste') {
+                            scorePoints = 5;
+                        }
+                    } else {
+                        showMessage('Không thể đặt bài ở đây! (Lệch màu hoặc thứ tự)');
+                    }
+                } 
+                
+                // THAY ĐỔI CỌC ĐÍCH: Foundation
+                else if (type === 'foundation') {
+                    // Chỉ được di chuyển 1 lá
+                    if (movedCards.length === 1 && isValidFoundationMove(gamePiles.foundations[index], movedCards[0])) {
+                        gamePiles.foundations[index].push(movedCards[0]);
+                        // Xóa lá đã di chuyển khỏi cọc nguồn
+                        sourcePile.pop();
+                        moveSuccessful = true;
+                        scorePoints = 10; // Điểm khi di chuyển vào Foundation
+                    } else if (movedCards.length > 1) {
+                        showMessage('Chỉ được di chuyển TỪNG LÁ MỘT vào Foundation!');
+                    } else {
+                        showMessage('Không thể đặt bài ở Foundation! (Sai chất hoặc thứ tự)');
+                    }
+                }
+                
+                // THAY ĐỔI CỌC ĐÍCH: Click lại vào lá đã chọn (hủy chọn)
+                else if (type === selectedPileType && index === selectedPileIndex && cardIndex >= selectedCardIndex) {
+                    resetSelection();
+                    renderGame();
+                    return;
+                }
+
+
+                // XỬ LÝ SAU KHI DI CHUYỂN THÀNH CÔNG
+                if (moveSuccessful) {
+                    updateScore(scorePoints);
+                    showMessage('Nước đi hợp lệ! Go go go!');
+                    
+                    // Lật lá bài tiếp theo trong Tableau nếu cần
+                    if (selectedPileType === 'tableau' && sourcePile.length > 0) {
+                        const topCard = sourcePile[sourcePile.length - 1];
+                        if (!topCard.isFaceUp) {
+                            topCard.isFaceUp = true;
+                            updateScore(5); // Điểm lật bài
+                            showMessage('Đã lật bài mới (+5 điểm)!');
+                        }
+                    }
+                }
+                
+                // Reset trạng thái chọn sau khi thử di chuyển
+                resetSelection();
+                renderGame();
+                return;
+            }
+        }
+
+
+        // Xử lý click vào vùng chứa rỗng của Tableau (Chỉ cho phép đặt VUA)
+        document.querySelectorAll('.tableau-slot').forEach((slot, index) => {
+            slot.addEventListener('click', () => {
+                if (gamePiles.tableau[index].length === 0 && selectedPileType) {
+                    
+                    let sourcePile;
+                    let movedCards;
+                    
+                    if (selectedPileType === 'waste') {
+                        sourcePile = gamePiles.waste;
+                        movedCards = [sourcePile[sourcePile.length - 1]];
+                    } else if (selectedPileType === 'tableau') {
+                        sourcePile = gamePiles.tableau[selectedPileIndex];
+                        movedCards = sourcePile.slice(selectedCardIndex);
+                    } else {
+                        resetSelection();
+                        renderGame();
+                        return;
+                    }
+
+                    // Nếu cọc trống, chỉ được đặt Vua (K)
+                    if (movedCards[0].rank === 'K') {
+                        gamePiles.tableau[index].push(...movedCards);
+                        sourcePile.splice(selectedCardIndex);
+                        
+                        // Lật bài nguồn nếu cần (giống logic trên)
+                        if (selectedPileType === 'tableau' && sourcePile.length > 0) {
+                            const topCard = sourcePile[sourcePile.length - 1];
+                            if (!topCard.isFaceUp) {
+                                topCard.isFaceUp = true;
+                                updateScore(5); 
+                            }
+                        }
+
+                        updateScore(5); // Điểm khi đặt Vua vào cọc trống
+                        showMessage('Đặt Vua hợp lệ!');
+                        resetSelection();
+                        renderGame();
+                        return;
+                    } else {
+                        showMessage('Cọc trống chỉ chấp nhận Vua (K)!');
+                    }
+                }
+                
+                // Nếu click vào slot rỗng mà không có bài được chọn, reset selection
+                resetSelection();
+                renderGame();
+            });
+        });
+
+        // --- 8. GEMINI API INTEGRATION (Gợi Ý Chiến Thuật) ---
+
+        const GEMINI_MODEL = "gemini-2.5-flash-preview-05-20";
+        // =========================================================================================
+        // IMPORTANT: API KEY MANAGEMENT
+        // When running on Canvas, the key is provided automatically.
+        // If you download this file and run it locally, paste your actual Gemini API Key here:
+        // const API_KEY = "PASTE_YOUR_SECRET_KEY_HERE"; 
+        // DO NOT COMMIT YOUR REAL KEY TO A PUBLIC GITHUB REPOSITORY! Delete it before pushing.
+        const API_KEY = "AIzaSyA4SZVhCNPYE4N1EXVgSGYIDL-UHpkSZOU"; 
+        // =========================================================================================
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
+        
+        // Chuyển trạng thái game thành chuỗi text dễ hiểu cho LLM
+        function serializeGameState() {
+            let state = `Tình trạng ván Solitaire hiện tại (Klondike):\n\n`;
+
+            // 1. Waste (Bài đã lật)
+            const wasteCard = gamePiles.waste.length > 0 ? gamePiles.waste[gamePiles.waste.length - 1].toString() : 'Trống';
+            state += `Waste (Bài đã lật): ${wasteCard} (lá trên cùng)\n`;
+
+            // 2. Stock (Bài rút)
+            state += `Stock (Số lá còn lại): ${gamePiles.stock.length}\n`;
+
+            // 3. Foundations (4 Cọc Mục Tiêu)
+            state += `Foundations (Mục tiêu - lá trên cùng):\n`;
+            for (const suit in gamePiles.foundations) {
+                const card = gamePiles.foundations[suit].length > 0 ? gamePiles.foundations[suit][gamePiles.foundations[suit].length - 1].toString() : 'Trống';
+                state += `  ${SUIT_SYMBOLS[suit]}: ${card}\n`;
+            }
+
+            // 4. Tableau (7 Cọc Chính)
+            state += `\nTableau (7 Cọc Chính):\n`;
+            gamePiles.tableau.forEach((pile, index) => {
+                const faceUpCards = pile.filter(c => c.isFaceUp);
+                const faceDownCount = pile.length - faceUpCards.length;
+                let pileContent = '';
+
+                if (faceUpCards.length > 0) {
+                    pileContent = faceUpCards.map(c => c.toString()).join(', ');
+                    pileContent = `[${pileContent}]`;
+                } else if (pile.length === 0) {
+                    pileContent = 'Cọc trống';
+                } else {
+                    pileContent = 'Toàn bộ úp';
+                }
+                
+                state += `  Cọc ${index + 1} (${faceDownCount} lá úp): ${pileContent}\n`;
+            });
+
+            const userQuery = `Dựa trên trạng thái trò chơi trên, hãy phân tích nhanh và đưa ra MỘT GỢI Ý CHIẾN THUẬT tốt nhất tiếp theo để tối ưu hóa ván bài (ví dụ: "Di chuyển 7♠ từ Cọc 3 lên 8♥ ở Cọc 1" hoặc "Rút bài từ Stock để tìm quân bài mới"). Giữ gợi ý ngắn gọn và chỉ tập trung vào nước đi tối ưu nhất.`;
+            
+            return {
+                system: "Bạn là một Chuyên gia Solitaire (Klondike) huyền thoại. Nhiệm vụ của bạn là phân tích trạng thái bàn chơi và đưa ra gợi ý nước đi tối ưu nhất cho người chơi. Phản hồi của bạn phải ngắn gọn, súc tích, và chỉ tập trung vào chiến thuật.",
+                query: state + "\n\n" + userQuery
+            };
+        }
+
+        async function fetchGemini(payload) {
+            let attempt = 0;
+            const maxRetries = 3;
+            let lastError = null;
+
+            // Kiểm tra key trước khi gọi API nếu không chạy trong môi trường Canvas
+            if (API_KEY === "" && typeof __initial_auth_token === 'undefined') {
+                showMessage("Lỗi Key: Vui lòng dán Key API của bạn vào file HTML (mục 8) để bật gợi ý AI.");
+                return null;
+            }
+
+            while (attempt < maxRetries) {
+                const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                if (attempt > 0) await new Promise(resolve => setTimeout(resolve, delay));
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API failed with status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (text) {
+                        return text;
+                    } else {
+                        throw new Error('Received empty response from Gemini.');
+                    }
+                } catch (error) {
+                    lastError = error;
+                    attempt++;
+                }
+            }
+            console.error(`Failed to fetch from Gemini after ${maxRetries} attempts. Last error: ${lastError.message}`);
+            throw new Error(`Thất bại khi gọi API. Key có thể không hợp lệ hoặc đã hết Rate Limit.`);
+        }
+
+
+        async function getGeminiHint() {
+            const hintButton = document.getElementById('hint-button');
+            const originalText = hintButton.innerHTML;
+
+            // 1. Cập nhật UI loading
+            hintButton.disabled = true;
+            hintButton.innerHTML = '✨ Đang phân tích...';
+            showMessage('Chuyên gia AI đang phân tích bàn chơi...');
+
+            try {
+                // 2. Chuẩn bị payload
+                const gameState = serializeGameState();
+                const payload = {
+                    contents: [{ parts: [{ text: gameState.query }] }],
+                    systemInstruction: { parts: [{ text: gameState.system }] },
+                    // Không cần grounding vì đây là phân tích logic game
+                };
+
+                // 3. Gọi API
+                const hint = await fetchGemini(payload);
+                if (!hint) return;
+
+                // 4. Hiển thị gợi ý
+                showMessage(`✨ Gợi Ý AI: ${hint}`);
+
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                showMessage(error.message);
+            } finally {
+                // 5. Reset UI
+                hintButton.disabled = false;
+                hintButton.innerHTML = originalText;
+            }
+        }
+        
+        // Bắt đầu game khi tải trang
+        window.onload = initGame;
+
+    </script>
+</body>
+</html>
