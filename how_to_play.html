@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Chơi Solitaire</title>
+    <!-- Tải Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Material Symbols Outlined Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Thiết lập màu sắc M3 Dark Mode */
+        :root {
+            --surface: #1a1c20;
+            --on-surface: #e6e1e6;
+            --primary: #60c9ff;
+            --primary-container: rgba(96, 201, 255, 0.1);
+        }
+        body {
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--primary);
+        }
+        .section-card {
+            background-color: #2c2f35;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+        }
+        .anchor-link {
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-4xl mx-auto py-8">
+        
+        <!-- Header và Nút Thoát -->
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-4xl font-extrabold">SOLITAIRE: Hướng Dẫn Chơi</h1>
+            <!-- Nút Thoát về Hub -->
+            <a href="https://tuanphong3108.github.io/solitaire/index.html" 
+               class="flex items-center space-x-2 text-white px-4 py-2 bg-red-600 rounded-full hover:bg-red-500 transition shadow-lg">
+                <span class="material-symbols-outlined">close</span>
+                <span>Thoát</span>
+            </a>
+        </div>
+
+        <!-- Mục Lục -->
+        <div class="p-6 section-card rounded-xl mb-12">
+            <h2 class="text-2xl font-bold mb-4 text-white">Mục Lục</h2>
+            <ul class="list-disc ml-5 space-y-2 text-gray-300">
+                <li><a href="#luat-chinh" class="anchor-link">Luật Chơi Cơ Bản</a></li>
+                <li><a href="#vung-choi" class="anchor-link">Các Khu Vực Trong Game</a></li>
+                <li><a href="#quy-tac-chuyen" class="anchor-link">Quy Tắc Di Chuyển Bài</a></li>
+                <li><a href="#chien-thang" class="anchor-link">Làm Thế Nào Để Thắng?</a></li>
+            </ul>
+        </div>
+        
+        <!-- Phần 1: Luật Chơi Cơ Bản -->
+        <div id="luat-chinh" class="section-card p-6 rounded-xl mb-8">
+            <h2 class="text-3xl font-bold mb-4 text-white">1. Luật Chơi Cơ Bản</h2>
+            <p class="mb-4">Solitaire (hay Klondike) là trò chơi xếp bài một người chơi. Mục tiêu là sắp xếp toàn bộ 52 lá bài theo thứ tự từ Át (A) đến Già (K) và theo cùng một chất vào 4 cọc <strong>Foundation</strong>.</p>
+            
+            <h3 class="text-xl font-semibold mt-6 mb-3 text-primary">Bộ Bài</h3>
+            <p>Sử dụng bộ bài 52 lá tiêu chuẩn, không có Joker.</p>
+            
+            <h3 class="text-xl font-semibold mt-6 mb-3 text-primary">Mục tiêu</h3>
+            <p>Chuyển tất cả 52 lá bài lên 4 cọc Foundation, mỗi cọc một chất (Cơ, Rô, Chuồn, Bích), bắt đầu bằng Át (A) và kết thúc bằng Già (K).</p>
+        </div>
+
+        <!-- Phần 2: Các Khu Vực Trong Game -->
+        <div id="vung-choi" class="section-card p-6 rounded-xl mb-8">
+            <h2 class="text-3xl font-bold mb-4 text-white">2. Các Khu Vực Trong Game</h2>
+            
+            <p class="mb-6">Sân chơi Solitaire được chia làm 4 khu vực chính:</p>
+            
+            <!-- ĐÃ CẬP NHẬT ẢNH SƠ ĐỒ THỰC TẾ -->
+            <img src="https://tuanphong3108.github.io/solitaire/solitaire_map_google.png" alt="Sơ đồ bố cục game Solitaire" class="w-full h-auto rounded-lg my-4 border border-gray-600">
+            <!-- Ảnh minh họa thực tế Solitaire -->
+            
+
+            <ul class="space-y-4 text-gray-300">
+                <li>
+                    <strong class="text-primary">a. Tableau (7 Cọc Chính):</strong> 
+                    <span class="text-white">Khu vực chơi chính, có 7 cọc bài được chia từ 1 đến 7 lá. Lá bài cuối cùng của mỗi cọc luôn được lật ngửa.</span>
+                </li>
+                <li>
+                    <strong class="text-primary">b. Foundation (4 Cọc Mục Tiêu):</strong> 
+                    <span class="text-white">4 ô trống ở trên cùng bên phải. Nơi bạn xây dựng 4 chất bài (Cơ, Rô, Chuồn, Bích) theo thứ tự tăng dần từ A đến K.</span>
+                </li>
+                <li>
+                    <strong class="text-primary">c. Stock (Cọc Rút):</strong> 
+                    <span class="text-white">Những lá bài còn lại sau khi chia bài vào Tableau. Bạn rút bài từ đây để chơi.</span>
+                </li>
+                <li>
+                    <strong class="text-primary">d. Waste (Cọc Lật):</strong> 
+                    <span class="text-white">Các lá bài được rút từ Stock sẽ được lật ngửa và đặt ở đây. Chỉ lá bài trên cùng của Waste mới được sử dụng.</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Phần 3: Quy Tắc Di Chuyển Bài -->
+        <div id="quy-tac-chuyen" class="section-card p-6 rounded-xl mb-8">
+            <h2 class="text-3xl font-bold mb-4 text-white">3. Quy Tắc Di Chuyển Bài</h2>
+            
+            <ul class="space-y-4 text-gray-300">
+                <li>
+                    <strong class="text-primary">Tableau → Tableau:</strong> 
+                    <span class="text-white">Chuyển bài theo thứ tự <strong>giảm dần</strong> và <strong>khác màu</strong> (Đen → Đỏ, Đỏ → Đen). Bạn có thể di chuyển một lá hoặc một chuỗi các lá bài đã được lật ngửa.</span>
+                    <p class="text-sm italic mt-1">Ví dụ: Đặt lá Q (Đỏ) lên lá K (Đen).</p>
+                </li>
+                <li>
+                    <strong class="text-primary">Tableau Rỗng:</strong> 
+                    <span class="text-white">Nếu một cọc Tableau bị trống, bạn <strong>chỉ được phép</strong> đặt lá <strong>Già (K)</strong> vào đó.</span>
+                </li>
+                <li>
+                    <strong class="text-primary">Waste/Tableau → Foundation:</strong> 
+                    <span class="text-white">Chuyển bài theo thứ tự <strong>tăng dần</strong> và <strong>cùng chất</strong> (ví dụ: A → 2 → 3 của chất Cơ).</span>
+                    <p class="text-sm italic mt-1">Lá đầu tiên phải là Át (A).</p>
+                </li>
+                <li>
+                    <strong class="text-primary">Rút Bài:</strong> 
+                    <span class="text-white">Click vào cọc Stock để lật một lá bài sang Waste. Khi Stock hết, bạn có thể <strong>tái chế</strong> bài từ Waste về Stock (lật úp lại).</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Phần 4: Làm Thế Nào Để Thắng? -->
+        <div id="chien-thang" class="section-card p-6 rounded-xl mb-8">
+            <h2 class="text-3xl font-bold mb-4 text-white">4. Làm Thế Nào Để Thắng?</h2>
+            <p class="mb-4">Bạn chiến thắng khi tất cả 52 lá bài được chuyển thành công lên 4 cọc Foundation (Mỗi cọc có A, 2, 3, ... , K cùng chất).</p>
+            
+            <h3 class="text-xl font-semibold mt-6 mb-3 text-primary">Chiến Lược Mẹo</h3>
+            <ul class="list-disc ml-5 space-y-2 text-gray-300">
+                <li><span class="text-white">Luôn cố gắng <strong>lật ngửa</strong> càng nhiều lá bài úp trong Tableau càng tốt.</span></li>
+                <li><span class="text-white">Không di chuyển bài lên Foundation quá sớm nếu bạn cần lá bài đó để lật lá bài úp trong Tableau.</span></li>
+                <li><span class="text-white">Ưu tiên chuyển <strong>Già (K)</strong> vào các cột Tableau rỗng.</span></li>
+            </ul>
+        </div>
+        
+        <!-- Footer -->
+        <p class="text-center text-gray-500 mt-10 text-sm">Chúc Phong và người chơi có những phút giây giải trí vui vẻ!</p>
+
+    </div>
+</body>
+</html>
