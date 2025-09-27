@@ -111,43 +111,29 @@
                 font-size: 0.7rem;
             }
         }
-        
-        /* Style cho Nút Thoát */
-        .exit-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(255, 0, 0, 0.7);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s;
-            z-index: 1000;
-        }
-        .exit-button:hover {
-            background-color: #ff0000;
-            transform: scale(1.1);
+        /* Style cho Modal */
+        .modal {
+            transition: opacity 0.3s ease;
         }
     </style>
 </head>
 <body class="bg-[var(--table-color)]">
 
-    <div id="game-container" class="w-full max-w-6xl p-4 bg-transparent rounded-xl relative">
+    <div id="game-container" class="w-full max-w-6xl p-4 bg-transparent rounded-xl">
         
-        <!-- NÚT THOÁT GAME (Mới thêm) -->
+        <!-- Nút Đóng/Quay lại -->
+        <!-- Thêm nút đóng game -->
         <button 
-            class="exit-button" 
-            onclick="window.location.href = 'https://tuanphong3108.github.io/solitaire/index.html';" 
-            title="Thoát Game">
-            X
+            id="exit-game-button"
+            onclick="showExitModal();"
+            class="absolute top-4 right-4 p-2 rounded-full text-xl font-bold cursor-pointer transition shadow-lg bg-red-600 text-white hover:bg-red-700 z-[1000]"
+            title="Thoát game và quay lại trang chủ"
+        >
+            <span class="material-symbols-outlined">
+                x
+            </span>
         </button>
-        
+
         <!-- Hàng Trên: Stock, Waste, Foundation -->
         <div id="top-row" class="flex justify-between mb-8">
             
@@ -217,6 +203,24 @@
                 <button onclick="hideModal(); initGame();" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full hover:bg-red-500 transition shadow-lg">
                     Chơi Ván Mới
                 </button>
+            </div>
+        </div>
+        
+        <!-- Modal Xác Nhận Thoát (MỚI) -->
+        <div id="exit-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[2000]">
+            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-sm w-full text-center border border-gray-700">
+                <h3 class="text-2xl font-extrabold mb-2 text-white">Bạn chắc chắn có muốn thoát không?</h3>
+                <p class="mb-6 text-sm text-gray-400">Các thay đổi của bạn sẽ không được lưu.</p>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="window.location.href = 'https://tuanphong3108.github.io/solitaire/index.html';" 
+                            class="px-5 py-2 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition shadow-lg">
+                        Thoát & Quay về
+                    </button>
+                    <button onclick="hideExitModal();" 
+                            class="px-5 py-2 bg-gray-600 text-white font-bold rounded-full hover:bg-gray-700 transition shadow-lg">
+                        Tiếp tục trò chơi
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -327,6 +331,17 @@
         function hideModal() {
             document.getElementById('game-modal').classList.add('hidden');
         }
+        
+        // --- CHỨC NĂNG MODAL THOÁT GAME MỚI ---
+        const exitModal = document.getElementById('exit-modal');
+        function showExitModal() {
+            exitModal.classList.remove('hidden');
+        }
+
+        function hideExitModal() {
+            exitModal.classList.add('hidden');
+        }
+        // ------------------------------------
 
 
         // Kiểm tra điều kiện thắng
