@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solitaire Hub - Chọn Phiên Bản</title>
+    <!-- Tải Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Material Symbols Outlined Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Thiết lập màu sắc M3 Dark Mode */
+        :root {
+            --surface: #1a1c20;
+            --on-surface: #e6e1e6;
+            --primary: #60c9ff;
+            --primary-container: rgba(96, 201, 255, 0.1);
+        }
+        body {
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--primary-container);
+            border: 1px solid rgba(96, 201, 255, 0.4);
+        }
+        .card-button:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            background-color: rgba(96, 201, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-12 p-8">
+        
+        <!-- Nút 1: Phong VN's Solitaire (Game tự code) -->
+        <a href="https://tuanphong3108.github.io/Solitaire/game.html" class="block w-full md:w-96">
+            <div class="card-button p-6 rounded-2xl shadow-xl flex items-center space-x-4">
+                <img src="https://tuanphong3108.github.io/Solitaire/icon.png" alt="Icon" class="w-16 h-16 rounded-lg shadow-lg">
+                <div class="flex-1">
+                    <h2 class="text-2xl font-extrabold text-white">Phong VN's Solitaire</h2>
+                    <p class="text-sm text-gray-400 mt-1">Trò chơi được lập trình bởi Phong VN.</p>
+                </div>
+                <span class="material-symbols-outlined text-4xl text-white">
+                    play_circle
+                </span>
+            </div>
+        </a>
+
+        <!-- Nút 2: Google Solitaire (Game nhúng) -->
+        <a href="https://tuanphong3108.github.io/Solitaire/googlegame.html" class="block w-full md:w-96">
+            <div class="card-button p-6 rounded-2xl shadow-xl flex items-center space-x-4">
+                <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google Logo" class="w-16 h-16 object-contain rounded-lg shadow-lg bg-white p-1">
+                <div class="flex-1">
+                    <h2 class="text-2xl font-extrabold text-white">Google Solitaire</h2>
+                    <p class="text-sm text-gray-400 mt-1">Phiên bản kinh điển từ Google.</p>
+                </div>
+                <!-- Đã đổi icon thành 'play_circle' để đồng bộ với nút thứ nhất -->
+                <span class="material-symbols-outlined text-4xl text-white">
+                    play_circle
+                </span>
+            </div>
+        </a>
+    </div>
+
+</body>
+</html>
