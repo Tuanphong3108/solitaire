@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Google Solitaire</title>
+    <!-- Tải Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Material Symbols Outlined Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Đảm bảo giao diện chiếm toàn bộ viewport */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Ngăn cuộn trang chính */
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1c20; /* Dark background M3 */
+        }
+        #embed-container {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #game-iframe {
+            flex-grow: 1; /* iFrame chiếm hết không gian còn lại */
+            border: none;
+        }
+        .close-button {
+            z-index: 1000;
+            /* M3 Primary Container Style - BẠC ĐẶC (SOLID) */
+            background-color: #60c9ff; /* Màu nền đặc, nổi bật */
+            color: #1a1c20; /* Màu icon tối để tương phản trên nền sáng */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s;
+        }
+        .close-button:hover {
+            background-color: #a0e0ff; /* Sáng hơn khi hover */
+            color: #1a1c20; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="embed-container">
+        
+        <!-- Nút Đóng/Quay lại (Material Symbol) -->
+        <!-- Nút đã được làm đặc để che dấu vết nút gốc của Google -->
+        <button 
+            id="close-button"
+            onclick="window.location.href = 'https://tuanphong3108.github.io/Solitaire/index.html';"
+            class="close-button absolute top-4 right-4 p-2 rounded-full text-xl font-bold cursor-pointer hover:shadow-lg"
+            title="Quay lại trang chủ Solitaire"
+        >
+            <span class="material-symbols-outlined">
+                close
+            </span>
+        </button>
+
+        <!-- Khung nhúng trò chơi Solitaire của Google -->
+        <iframe 
+            id="game-iframe" 
+            src="https://www.google.com/logos/fnbx/solitaire/standalone.html" 
+            title="Google Solitaire Game Embedded"
+            class="w-full"
+        >
+        </iframe>
+    </div>
+
+</body>
+</html>
