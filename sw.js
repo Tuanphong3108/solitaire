@@ -3,11 +3,13 @@ const CACHE_NAME = 'solitaire-m3-cache-v1.0.2';
 
 // Danh sách các file cốt lõi cần cache để chạy offline
 const urlsToCache = [
-    './solitaire_game.html',
+    './game.html',
+    './googlegame.html
     './manifest.json',
     // Giữ Tailwind CDN để có thể hoạt động offline sau khi tải lần đầu
     'https://cdn.tailwindcss.com',
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap'
+    './icon.png'
     // 'icon.png' - giả định file này có sẵn
 ];
 
