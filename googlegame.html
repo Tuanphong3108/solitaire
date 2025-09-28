@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <!-- THAY ĐỔI: Header theme color đã đặt thành #313131 -->
     <meta name="theme-color" content="#313131">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,263 +16,159 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        /* Thiết lập màu sắc */
+        :root {
+            --surface: #1a1c20;
+            --on-surface: #e6e1e6;
+            --primary: #60c9ff;
+        }
+
         /* Đảm bảo giao diện chiếm toàn bộ viewport */
         html, body {
             height: 100%;
             margin: 0;
             overflow: hidden; /* Ngăn cuộn trang chính */
             font-family: 'Inter', sans-serif;
-            background-color: #1a1c20; /* Dark background M3 */
+            background-color: var(--surface);
         }
-
         #embed-container {
             position: relative;
             height: 100%;
             display: flex;
             flex-direction: column;
         }
-
-        /* Loading Spinner Container */
-        #loading-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #1a1c20; /* Giữ nền tối */
-            z-index: 1500; /* Cao hơn iframe nhưng thấp hơn modal */
-            transition: opacity 0.3s ease-out;
-        }
-        
-        /* Loading Spinner Icon - Tự xoay (Dùng cho Google Logo) */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(0.95); }
-        }
-        .animate-pulse-custom {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-
         #game-iframe {
-            flex-grow: 1; /* iFrame chiếm hết không gian còn lại */
+            flex-grow: 1;
+            width: 100%;
             border: none;
-            visibility: hidden; /* Ban đầu ẩn iframe đi */
-            opacity: 0; /* Dùng opacity để hiện/ẩn mượt mà hơn */
-            transition: opacity 0.5s;
+            /* Tăng độ mượt khi load game */
+            transition: opacity 0.3s ease-in-out; 
+        }
+
+        /* THAY ĐỔI: Styling cho Nút Home mới (Nhỏ hơn) */
+        .btn-home {
+            background-color: #313131; /* Nền cố định */
+            color: #FFFFFF; /* Icon trắng cố định */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5); /* Shadow đậm */
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-home:hover {
+            background-color: #4a4a4a; /* Hơi sáng hơn khi hover */
+            transform: translateY(-1px);
+            box-shadow: 0 6px 10px -1px rgba(0, 0, 0, 0.5);
+        }
+        .btn-home:active {
+            transform: translateY(1px);
+        }
+
+        /* Styling cho Modal No-Internet */
+        #no-internet-modal {
+            background-color: rgba(26, 28, 32, 0.95); /* Semi-transparent dark overlay */
+            z-index: 9999; /* Đảm bảo nằm trên mọi thứ */
+        }
+        .modal-card {
+            background-color: #2D3035; /* Darker surface */
+            border: 2px solid var(--primary);
+            color: var(--on-surface);
+        }
+        .btn-reload {
+            background-color: var(--primary);
+            color: var(--surface);
+            transition: transform 0.1s;
+        }
+        .btn-reload:hover {
+            background-color: #79d7ff;
+            transform: translateY(-1px);
+        }
+        .btn-reload:active {
+            transform: translateY(1px);
         }
         
-        /* Style chung cho các nút điều khiển */
-        .close-button {
-            z-index: 2000; /* Luôn nổi bật hơn tất cả */
-            padding: 0.5rem;
-            border-radius: 9999px;
-            font-size: 1.25rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            transition: all 0.2s;
+        /* Modal Thoát Game */
+        #exit-modal {
+            background-color: rgba(26, 28, 32, 0.8);
         }
-        /* Nút Đóng */
-        .close-button {
-            background-color: #60c9ff;
-            color: #1a1c20;
-        }
-        .close-button:hover {
-            background-color: #a0e0ff;
-        }
-        /* Container cho nút Nhạc (dưới cùng) */
-        #music-control-container {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            z-index: 2000;
-            background-color: #3b3b3b;
-            color: #ffffff;
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            transition: all 0.2s;
-            user-select: none;
-        }
-        #music-control-container:hover {
-            background-color: #555555;
-        }
-        /* Style cho Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000; /* Cao nhất */
-            transition: opacity 0.3s;
-        }
-        .modal-content {
-            background-color: #1f2937;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-            max-width: 400px;
-            text-align: center;
-        }
-        .modal-button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            transition: background-color 0.2s;
-            margin: 0.5rem;
-        }
-        .primary-button {
-            background-color: #60c9ff;
-            color: #1a1c20;
-        }
-        .primary-button:hover {
-            background-color: #a0e0ff;
-        }
-        .secondary-button {
-            background-color: #374151;
-            color: #ffffff;
-        }
-        .secondary-button:hover {
-            background-color: #4b5563;
-        }
-        .mute-label {
-            font-size: 0.875rem; /* text-sm */
-            font-weight: 600; /* semibold */
+        .exit-modal-content {
+            background-color: #2D3035;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
-<body id="main-body">
-
+<body>
     <div id="embed-container">
-        
-        <!-- Nút Đóng/Quay lại -->
-        <!-- Đặt Nút Đóng cố định ở đây, z-index cao -->
-        <button 
-            id="close-button"
-            onclick="showExitModal();"
-            class="close-button absolute top-4 right-4 p-2 rounded-full text-xl font-bold cursor-pointer hover:shadow-lg"
-            title="Quay lại trang chủ Solitaire"
-        >
-            <span class="material-symbols-outlined">
-                close
-            </span>
-        </button>
-        
-        <!-- LOADING SPINNER (Xuất hiện trước) -->
-        <div id="loading-container">
-            <!-- Logo Google (thay cho icon xoay) -->
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png" 
-                 alt="Google Logo" 
-                 class="w-20 h-20 mb-4 animate-pulse-custom" />
-            <p class="mt-4 text-xl text-gray-300">Đang kết nối tới Google...</p>
+        <!-- Google Solitaire (Embedded) - Dùng link Standalone của Google -->
+        <iframe id="game-iframe" 
+                src="https://www.google.com/logos/fnbx/solitaire/standalone.html?hl=vi" 
+                allowfullscreen 
+                title="Google Solitaire Standalone"></iframe>
+
+        <!-- Thanh điều khiển tích hợp -->
+        <!-- THAY ĐỔI: Nút home nhỏ gọn hơn -->
+        <div id="controls" class="fixed top-4 right-4 flex space-x-3 z-50">
+            
+            <!-- Nút Thoát và Quay về Hub (Dùng icon Home) -->
+            <button id="exit-button" onclick="showExitModal()" 
+                    class="p-1.5 w-10 h-10 rounded-full btn-home flex items-center justify-center">
+                <span class="material-symbols-outlined text-xl">home</span>
+            </button>
         </div>
 
-        <!-- Khung nhúng trò chơi Solitaire của Google (Ẩn ban đầu) -->
-        <iframe 
-            id="game-iframe"
-            src="https://www.google.com/logos/fnbx/solitaire/standalone.html?hl=vi"
-            frameborder="0"
-            scrolling="no"
-            allow="autoplay; fullscreen" 
-        ></iframe>
+        <!-- Nhạc nền (Đã ẩn khỏi UI) -->
+        <audio id="background-music" loop style="display: none;">
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+        </audio>
 
-    </div>
-
-    <!-- Modal Xác Nhận Thoát Game -->
-    <div id="exit-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold text-white mb-2">Bạn chắc chắn có muốn thoát không?</h2>
-            <p class="text-sm text-gray-400 mb-6">Các thay đổi của bạn sẽ không được lưu.</p>
-            <div class="flex justify-center space-x-4">
-                <!-- Icon 'home' cho hành động quay về trang chủ -->
-                <button 
-                    onclick="confirmExit();"
-                    class="modal-button primary-button"
-                >
-                    <span class="material-symbols-outlined mr-2">home</span> Thoát & Quay về
-                </button>
-                <button 
-                    onclick="hideExitModal();"
-                    class="modal-button secondary-button"
-                >
-                    Tiếp tục trò chơi
+        <!-- Modal 1: Mất Kết Nối Internet (Vẫn giữ logic check mạng) -->
+        <div id="no-internet-modal" class="fixed inset-0 flex justify-center items-center" style="display: none;">
+            <div class="modal-card p-8 rounded-xl max-w-sm mx-4 text-center shadow-2xl">
+                <span class="material-symbols-outlined text-6xl text-red-500 mb-4">signal_wifi_connected_no_internet_4</span>
+                <h3 class="text-2xl font-bold mb-3 text-white">Mất Kết Nối Internet</h3>
+                <p class="text-gray-400 mb-6">Không thể tải Google Solitaire. Vui lòng kiểm tra kết nối mạng của bạn.</p>
+                <button onclick="window.location.reload()" 
+                        class="btn-reload font-semibold py-3 px-8 rounded-lg shadow-md flex items-center justify-center w-full">
+                    <span class="material-symbols-outlined mr-2">refresh</span>
+                    Thử Lại
                 </button>
             </div>
         </div>
-    </div>
-    
-    <!-- Audio Element cho nhạc nền (LOOP) -->
-    <audio id="background-music" loop muted>
-        <source src="https://tuanphong3108.github.io/solitaire/lakey_inspired_blue_boi_1796005994136508556.mp3" type="audio/mp3">
-        Trình duyệt của bạn không hỗ trợ thẻ audio.
-    </audio>
 
-    <!-- Container cho nút Tắt/Bật Tiếng (LOA) MỚI - Đặt ở góc dưới bên phải -->
-    <div 
-        id="music-control-container"
-        onclick="toggleMute();"
-        title="Tắt/Bật nhạc nền Blue Boi"
-    >
-        <span class="material-symbols-outlined" id="mute-icon">
-            volume_off
-        </span>
-        <span class="mute-label">Nhạc</span>
+        <!-- Modal 2: Xác nhận Thoát Game -->
+        <div id="exit-modal" class="fixed inset-0 z-[100] flex justify-center items-center" style="display: none;">
+            <div class="exit-modal-content p-8 rounded-xl max-w-sm mx-4 text-center shadow-2xl">
+                <h3 class="text-2xl font-bold mb-4" style="color: var(--primary);">Bạn có chắc muốn thoát?</h3>
+                <p class="text-gray-300 mb-6">Mọi tiến trình (nếu có) sẽ bị mất.</p>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="hideExitModal()" 
+                            class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition">
+                        Ở lại
+                    </button>
+                    <button onclick="confirmExit()" 
+                            class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition">
+                        Thoát & Quay về Hub
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        let isMuted = true;
-        const muteIcon = document.getElementById('mute-icon');
-        const bgMusic = document.getElementById('background-music');
+        // --- CÁC PHẦN TỬ UI ---
         const exitModal = document.getElementById('exit-modal');
-        const loadingContainer = document.getElementById('loading-container');
+        const noInternetModal = document.getElementById('no-internet-modal');
         const gameIframe = document.getElementById('game-iframe');
+        const bgMusic = document.getElementById('background-music');
         
-        const MIN_LOADING_TIME = 2000; // Tối thiểu 2 giây
-
-        // Tạo ra một hàm định danh cho sự kiện chặn thoát
-        const exitConfirmationHandler = function (e) {
-            e.preventDefault(); 
-            e.returnValue = ''; 
-            return '';
+        // --- LOGIC CHẶN THOÁT ---
+        const exitConfirmationHandler = (event) => {
+            event.preventDefault();
+            event.returnValue = ''; 
         };
-
-        // Gắn sự kiện chặn tải lại/đóng tab
+        // Lắng nghe sự kiện chặn tải lại/đóng tab
         window.addEventListener('beforeunload', exitConfirmationHandler);
 
 
-        // --- Logic Loading (Hàm sẽ được gọi sau 2000ms) ---
-        function showGame() {
-            // Ẩn mượt mà loading container
-            loadingContainer.style.opacity = '0';
-            
-            // Đợi transition kết thúc (0.3s) rồi ẩn hẳn đi
-            setTimeout(() => {
-                loadingContainer.style.display = 'none';
-                
-                // Hiện iframe mượt mà
-                gameIframe.style.visibility = 'visible';
-                gameIframe.style.opacity = '1';
-            }, 300); 
-        }
-
-        // Kích hoạt hàm showGame sau 2000ms cố định
-        setTimeout(showGame, MIN_LOADING_TIME);
-
-        // --- Logic Modal ---
+        // --- Logic Modal Exit ---
         function showExitModal() {
             exitModal.style.display = 'flex';
         }
@@ -280,7 +177,7 @@
             exitModal.style.display = 'none';
         }
         
-        // HÀM MỚI: Gỡ bỏ chặn thoát và điều hướng
+        // HÀM: Gỡ bỏ chặn thoát và điều hướng
         function confirmExit() {
              // 1. Gỡ bỏ sự kiện chặn thoát
              window.removeEventListener('beforeunload', exitConfirmationHandler);
@@ -288,30 +185,42 @@
              // 2. Điều hướng về trang chủ
              window.location.href = 'https://tuanphong3108.github.io/solitaire/index.html';
         }
+        
+        // --- LOGIC CHECK KẾT NỐI INTERNET (QUAN TRỌNG) ---
 
-
-        // --- Logic Tắt/Bật Nhạc ---\
-        function toggleMute() {
-            isMuted = !isMuted;
-            
-            if (!isMuted) {
-                bgMusic.muted = false;
-                bgMusic.play().catch(e => console.error("Music play blocked:", e)); 
-                muteIcon.textContent = 'volume_up';
+        function checkConnection() {
+            if (navigator.onLine) {
+                // Đã có mạng: Ẩn thông báo, hiện game
+                noInternetModal.style.display = 'none';
+                gameIframe.style.opacity = '1';
+                console.log("Kết nối Internet đã khôi phục. Game hoạt động bình thường.");
+                
+                // Kích hoạt iframe tải lại nội dung nếu nó đang ở trạng thái mờ (opacity 0.1)
+                if (gameIframe.style.opacity === '0.1') { 
+                    gameIframe.src = gameIframe.src; // Gán lại src để ép iframe reload
+                }
             } else {
-                bgMusic.muted = true;
-                bgMusic.pause();
-                muteIcon.textContent = 'volume_off';
+                // Mất mạng: Hiện thông báo, ẩn game (hoặc giảm opacity)
+                noInternetModal.style.display = 'flex';
+                gameIframe.style.opacity = '0.1'; // Giảm opacity game để không chơi được/hiển thị phía sau modal
+                console.warn("Mất kết nối Internet. Đã hiện modal cảnh báo.");
             }
         }
 
-        // --- Khởi tạo ---
+        // --- Khởi tạo và Lắng nghe sự kiện mạng ---
         window.onload = () => {
-             // Xử lý nhạc nền
+             // Bắt đầu check mạng ngay lập tức
+             checkConnection();
+             
+             // Mặc định tắt nhạc nền nếu có, vì Google Solitaire không có nhạc
              bgMusic.muted = true;
-             bgMusic.play().catch(e => console.log("Music play failed on load, user must click Mute Button to start.")); 
-             muteIcon.textContent = 'volume_off';
+             bgMusic.pause();
         };
+
+        // Lắng nghe sự kiện thay đổi trạng thái mạng (giúp modal tự biến mất khi có mạng lại)
+        window.addEventListener('online', checkConnection);
+        window.addEventListener('offline', checkConnection);
+
     </script>
 </body>
 </html>
