@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#313131">
     <title>Embedded Google Solitaire</title>
     <!-- Favicon cho bản Public -->
     <link rel="icon" href="icon.png" type="image/png">
@@ -33,21 +32,50 @@
             flex-grow: 1; /* iFrame chiếm hết không gian còn lại */
             border: none;
         }
+        /* Style chung cho các nút điều khiển */
         .close-button {
             z-index: 1000;
-            /* M3 Primary Container Style - BẠC ĐẶC (SOLID) */
-            background-color: #60c9ff; /* Màu nền đặc, nổi bật */
-            color: #1a1c20; /* Màu icon tối để tương phản trên nền sáng */
+            padding: 0.5rem;
+            border-radius: 9999px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             transition: all 0.2s;
         }
+        /* Nút Đóng */
+        .close-button {
+            /* M3 Primary Container Style - BẠC ĐẶC (SOLID) */
+            background-color: #60c9ff; /* Màu nền đặc, nổi bật */
+            color: #1a1c20; /* Màu icon tối để tương phản trên nền sáng */
+        }
         .close-button:hover {
             background-color: #a0e0ff; /* Sáng hơn khi hover */
-            color: #1a1c20; 
         }
-        /* Style cho Modal */
-        .modal {
-            transition: opacity 0.3s ease;
+        /* Container cho nút Nhạc (dưới cùng) */
+        #music-control-container {
+            position: fixed;
+            bottom: 1rem; /* 4px */
+            right: 1rem; /* 4px */
+            z-index: 1000;
+            background-color: #3b3b3b;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s;
+            user-select: none; /* Ngăn chặn bôi đen chữ */
+        }
+        #music-control-container:hover {
+            background-color: #555555;
+        }
+        .mute-label {
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* semibold */
         }
     </style>
 </head>
@@ -58,7 +86,7 @@
         <!-- Nút Đóng/Quay lại -->
         <button 
             id="close-button"
-            onclick="showExitModal();"
+            onclick="window.location.href = 'https://tuanphong3108.github.io/solitaire/index.html';"
             class="close-button absolute top-4 right-4 p-2 rounded-full text-xl font-bold cursor-pointer hover:shadow-lg"
             title="Quay lại trang chủ Solitaire"
         >
@@ -69,43 +97,74 @@
 
         <!-- Khung nhúng trò chơi Solitaire của Google -->
         <iframe 
-            id="game-iframe" 
-            src="https://www.google.com/logos/fnbx/solitaire/standalone.html?hl=vi" 
-            title="Google Solitaire Game Embedded"
-            class="w-full"
-        >
-        </iframe>
+            id="game-iframe"
+            src="https://www.google.com/logos/fnbx/solitaire/standalone.html?hl=vi"
+            frameborder="0"
+            scrolling="no"
+            allow="autoplay; fullscreen" 
+        ></iframe>
+
+    </div>
+    
+    <!-- Container cho nút Tắt/Bật Tiếng (LOA) MỚI - Đặt ở góc dưới bên phải -->
+    <div 
+        id="music-control-container"
+        onclick="toggleMute();"
+        title="Tắt/Bật nhạc nền Blue Boi"
+    >
+        <span class="material-symbols-outlined" id="mute-icon">
+            volume_off
+        </span>
+        <span class="mute-label">Nhạc</span>
     </div>
 
-    <!-- Modal Xác Nhận Thoát -->
-    <div id="exit-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[2000]">
-        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-sm w-full text-center border border-gray-700">
-            <h3 class="text-2xl font-extrabold mb-2 text-white">Bạn chắc chắn có muốn thoát không?</h3>
-            <p class="mb-6 text-sm text-gray-400">Các thay đổi của bạn sẽ không được lưu.</p>
-            <div class="flex justify-center space-x-4">
-                <button onclick="window.location.href = 'https://tuanphong3108.github.io/solitaire/index.html';" 
-                        class="px-5 py-2 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition shadow-lg">
-                    Thoát & Quay về
-                </button>
-                <button onclick="hideExitModal();" 
-                        class="px-5 py-2 bg-gray-600 text-white font-bold rounded-full hover:bg-gray-700 transition shadow-lg">
-                    Tiếp tục trò chơi
-                </button>
-            </div>
-        </div>
-    </div>
+    
+    <!-- Audio Element cho nhạc nền (LOOP) -->
+    <audio id="background-music" loop muted>
+        <source src="https://tuanphong3108.github.io/solitaire/lakey_inspired_blue_boi_1796005994136508556.mp3" type="audio/mp3">
+        Trình duyệt của bạn không hỗ trợ thẻ audio.
+    </audio>
 
     <script>
-        const exitModal = document.getElementById('exit-modal');
+        let isMuted = true; // Trạng thái âm thanh nhạc nền ban đầu: TẮT
+        const muteIcon = document.getElementById('mute-icon');
+        const bgMusic = document.getElementById('background-music');
 
-        function showExitModal() {
-            exitModal.classList.remove('hidden');
+        /**
+         * Hàm điều khiển trạng thái Mute/Unmute cho nhạc nền Blue Boi.
+         * Được gọi khi click vào nút Loa.
+         */
+        function toggleMute() {
+            // Đảo trạng thái hiện tại
+            isMuted = !isMuted;
+            
+            if (!isMuted) {
+                // BẬT tiếng
+                bgMusic.muted = false;
+                // Cần play nhạc. Nếu lần đầu click, trình duyệt sẽ cho phép phát.
+                bgMusic.play().catch(e => console.error("Music play blocked:", e)); 
+                muteIcon.textContent = 'volume_up';
+                console.log('Nhạc nền: BẬT');
+            } else {
+                // TẮT tiếng
+                bgMusic.muted = true;
+                bgMusic.pause(); // Tạm dừng nhạc nền
+                muteIcon.textContent = 'volume_off';
+                console.log('Nhạc nền: TẮT');
+            }
         }
 
-        function hideExitModal() {
-            exitModal.classList.add('hidden');
-        }
+        // --- Khởi tạo ---
+        window.onload = () => {
+             // 1. Đảm bảo audio bị tắt tiếng ban đầu
+             bgMusic.muted = true;
+             
+             // 2. Cố gắng play nhạc ở trạng thái mute để nó sẵn sàng chạy ngay khi unmute
+             bgMusic.play().catch(e => console.log("Music play failed on load, user must click Mute Button to start.")); 
+             
+             // 3. Icon mặc định là TẮT
+             muteIcon.textContent = 'volume_off';
+        };
     </script>
-
 </body>
 </html>
