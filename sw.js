@@ -1,5 +1,5 @@
 // Định danh cache. CẦN THAY ĐỔI MỖI KHI CÓ BẢN CẬP NHẬT LỚN để kích hoạt xóa cache cũ.
-const CACHE_NAME = 'solitaire-m3-cache-v1.0.7'; 
+const CACHE_NAME = 'solitaire-m3-cache-v1.0.8'; 
 
 // Danh sách các file cốt lõi cần cache để chạy offline
 const urlsToCache = [
