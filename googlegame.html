@@ -41,11 +41,12 @@
             flex-grow: 1;
             width: 100%;
             border: none;
-            /* Tăng độ mượt khi load game */
-            transition: opacity 0.3s ease-in-out; 
+            /* Transition opacity mượt mà khi loading screen biến mất */
+            transition: opacity 0.5s ease-in-out; 
+            opacity: 0; /* KHỞI TẠO: Ẩn iframe cho đến khi tải xong */
         }
 
-        /* THAY ĐỔI: Styling cho Nút Home mới (Nhỏ hơn) */
+        /* Styling cho Nút Home */
         .btn-home {
             background-color: #313131; /* Nền cố định */
             color: #FFFFFF; /* Icon trắng cố định */
@@ -60,29 +61,6 @@
         .btn-home:active {
             transform: translateY(1px);
         }
-
-        /* Styling cho Modal No-Internet */
-        #no-internet-modal {
-            background-color: rgba(26, 28, 32, 0.95); /* Semi-transparent dark overlay */
-            z-index: 9999; /* Đảm bảo nằm trên mọi thứ */
-        }
-        .modal-card {
-            background-color: #2D3035; /* Darker surface */
-            border: 2px solid var(--primary);
-            color: var(--on-surface);
-        }
-        .btn-reload {
-            background-color: var(--primary);
-            color: var(--surface);
-            transition: transform 0.1s;
-        }
-        .btn-reload:hover {
-            background-color: #79d7ff;
-            transform: translateY(-1px);
-        }
-        .btn-reload:active {
-            transform: translateY(1px);
-        }
         
         /* Modal Thoát Game */
         #exit-modal {
@@ -92,9 +70,35 @@
             background-color: #2D3035;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
+        /* THÊM MỚI: Animation cho Loading Bar */
+        @keyframes loading-bar {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(50%); }
+            100% { transform: translateX(100%); }
+        }
+        .animate-loading-bar {
+            animation: loading-bar 2s infinite ease-in-out;
+        }
     </style>
 </head>
 <body>
+    
+    <!-- THÊM MỚI: Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 z-[101] flex flex-col justify-center items-center bg-[#1a1c20] transition-opacity duration-500">
+        <!-- Logo Google - Dùng ảnh công khai của Google -->
+        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" 
+             alt="Google Logo" 
+             class="w-40 h-auto mb-6 animate-pulse">
+        
+        <p class="text-white text-lg font-semibold tracking-wider">Đang kết nối tới Google Server...</p>
+        
+        <!-- Loading Bar -->
+        <div class="mt-4 w-64 h-2 bg-[#313131] rounded-full overflow-hidden">
+            <div class="h-full bg-white rounded-full animate-loading-bar"></div>
+        </div>
+    </div>
+    
     <div id="embed-container">
         <!-- Google Solitaire (Embedded) - Dùng link Standalone của Google -->
         <iframe id="game-iframe" 
@@ -103,7 +107,6 @@
                 title="Google Solitaire Standalone"></iframe>
 
         <!-- Thanh điều khiển tích hợp -->
-        <!-- THAY ĐỔI: Nút home nhỏ gọn hơn -->
         <div id="controls" class="fixed top-4 right-4 flex space-x-3 z-50">
             
             <!-- Nút Thoát và Quay về Hub (Dùng icon Home) -->
@@ -117,20 +120,6 @@
         <audio id="background-music" loop style="display: none;">
             <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
         </audio>
-
-        <!-- Modal 1: Mất Kết Nối Internet (Vẫn giữ logic check mạng) -->
-        <div id="no-internet-modal" class="fixed inset-0 flex justify-center items-center" style="display: none;">
-            <div class="modal-card p-8 rounded-xl max-w-sm mx-4 text-center shadow-2xl">
-                <span class="material-symbols-outlined text-6xl text-red-500 mb-4">signal_wifi_connected_no_internet_4</span>
-                <h3 class="text-2xl font-bold mb-3 text-white">Mất Kết Nối Internet</h3>
-                <p class="text-gray-400 mb-6">Không thể tải Google Solitaire. Vui lòng kiểm tra kết nối mạng của bạn.</p>
-                <button onclick="window.location.reload()" 
-                        class="btn-reload font-semibold py-3 px-8 rounded-lg shadow-md flex items-center justify-center w-full">
-                    <span class="material-symbols-outlined mr-2">refresh</span>
-                    Thử Lại
-                </button>
-            </div>
-        </div>
 
         <!-- Modal 2: Xác nhận Thoát Game -->
         <div id="exit-modal" class="fixed inset-0 z-[100] flex justify-center items-center" style="display: none;">
@@ -155,10 +144,10 @@
     <script>
         // --- CÁC PHẦN TỬ UI ---
         const exitModal = document.getElementById('exit-modal');
-        const noInternetModal = document.getElementById('no-internet-modal');
         const gameIframe = document.getElementById('game-iframe');
         const bgMusic = document.getElementById('background-music');
-        
+        const loadingScreen = document.getElementById('loading-screen'); 
+
         // --- LOGIC CHẶN THOÁT ---
         const exitConfirmationHandler = (event) => {
             event.preventDefault();
@@ -186,40 +175,35 @@
              window.location.href = 'https://tuanphong3108.github.io/solitaire/index.html';
         }
         
-        // --- LOGIC CHECK KẾT NỐI INTERNET (QUAN TRỌNG) ---
+        // THAY ĐỔI: Chuyển sang Logic "Fixed Delay" (Độ trễ Cố định)
+        
+        // Đặt timeout cố định 2000ms (2 giây) kể từ khi script chạy
+        setTimeout(() => {
+             console.log("Bắt đầu chuyển cảnh sau 2 giây cố định.");
+             
+             // 1. Bắt đầu làm mờ màn hình loading (Fade Out)
+             loadingScreen.style.opacity = '0';
+             
+             // 2. Đảm bảo iframe hiển thị (Fade In)
+             gameIframe.style.opacity = '1';
+             
+             // 3. Ẩn màn hình loading hoàn toàn sau khi transition opacity (500ms) kết thúc
+             setTimeout(() => {
+                 loadingScreen.style.display = 'none';
+             }, 500); 
 
-        function checkConnection() {
-            if (navigator.onLine) {
-                // Đã có mạng: Ẩn thông báo, hiện game
-                noInternetModal.style.display = 'none';
-                gameIframe.style.opacity = '1';
-                console.log("Kết nối Internet đã khôi phục. Game hoạt động bình thường.");
-                
-                // Kích hoạt iframe tải lại nội dung nếu nó đang ở trạng thái mờ (opacity 0.1)
-                if (gameIframe.style.opacity === '0.1') { 
-                    gameIframe.src = gameIframe.src; // Gán lại src để ép iframe reload
-                }
-            } else {
-                // Mất mạng: Hiện thông báo, ẩn game (hoặc giảm opacity)
-                noInternetModal.style.display = 'flex';
-                gameIframe.style.opacity = '0.1'; // Giảm opacity game để không chơi được/hiển thị phía sau modal
-                console.warn("Mất kết nối Internet. Đã hiện modal cảnh báo.");
-            }
-        }
+             // Không cần lắng nghe sự kiện iframe.onload nữa
+        }, 2000); // ĐỘ TRỄ CỐ ĐỊNH 2 GIÂY TRƯỚC KHI FADE OUT BẮT ĐẦU
+
 
         // --- Khởi tạo và Lắng nghe sự kiện mạng ---
         window.onload = () => {
-             // Bắt đầu check mạng ngay lập tức
-             checkConnection();
-             
              // Mặc định tắt nhạc nền nếu có, vì Google Solitaire không có nhạc
              bgMusic.muted = true;
              bgMusic.pause();
+             
+             // Bắt đầu ở trạng thái Loading Screen đang hiển thị (mặc định trong HTML)
         };
-
-        // Lắng nghe sự kiện thay đổi trạng thái mạng (giúp modal tự biến mất khi có mạng lại)
-        window.addEventListener('online', checkConnection);
-        window.addEventListener('offline', checkConnection);
 
     </script>
 </body>
