@@ -19,6 +19,8 @@
             --surface: #1a1c20; /* Nền tối */
             --on-surface: #e6e1e6; /* Chữ sáng */
             --primary: #60c9ff; /* Accent Xanh chính */
+            --primary-container: #00364d; /* Màu nền cho nút nhấn mạnh */
+            --on-primary-container: #a0e0ff; /* Màu chữ cho nút nhấn mạnh */
         }
 
         body {
@@ -35,18 +37,45 @@
         .game-button {
             background-color: #2c2f35;
             color: var(--on-surface);
-            transition: all 0.2s ease-in-out;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
         .game-button:hover {
             background-color: #3b3e44;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .primary-button-accent {
+            background-color: var(--primary-container);
+            color: var(--on-primary-container);
+            border-color: var(--primary);
+            box-shadow: 0 6px 10px rgba(96, 201, 255, 0.3); /* Shadow xanh */
+        }
+
+        .primary-button-accent:hover {
+            background-color: #004a66;
+            transform: scale(1.02);
+            box-shadow: 0 12px 20px rgba(96, 201, 255, 0.5);
         }
 
         .accent-text {
             color: var(--primary);
+        }
+        
+        /* Style cho chữ BETA */
+        .beta-tag {
+            background-color: #f59e0b; /* amber-500 */
+            color: #1a1c20; /* surface color */
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-left: 0.5rem;
+            display: inline-block;
+            line-height: 1;
         }
     </style>
 </head>
@@ -58,29 +87,33 @@
 
         <div class="space-y-6">
             
-            <!-- Nút 1: Phong VN's Solitaire -->
+            <!-- Nút 1: Phong VN's Solitaire (THÊM BETA) -->
             <a href="https://tuanphong3108.github.io/solitaire/game.html" 
                class="game-button flex items-center p-5 rounded-xl text-left shadow-lg">
-                <img src="https://tuanphong3108.github.io/solitaire/icon.png" alt="Phong VN Icon" class="w-10 h-10 mr-4 rounded-lg">
+                <img src="https://tuanphong3108.github.io/solitaire/icon.png" alt="Phong VN Icon" class="w-12 h-12 mr-4 rounded-xl border-2 border-white/50">
                 <div class="flex-grow">
-                    <h2 class="text-xl font-bold">Phong VN's Solitaire <span class="text-sm font-semibold text-yellow-400">(Beta)</span></h2>
-                    <p class="text-sm text-gray-400">Trò chơi được lập trình bởi Phong VN.</p>
+                    <h2 class="text-2xl font-bold flex items-center">
+                        Phong VN's Solitaire
+                        <span class="beta-tag">BETA</span>
+                    </h2>
+                    <p class="text-sm text-gray-400">Trò chơi đang trong giai đoạn phát triển.</p>
                 </div>
-                <span class="material-symbols-outlined text-3xl accent-text">play_circle</span>
+                <span class="material-symbols-outlined text-4xl accent-text">rocket_launch</span>
             </a>
 
-            <!-- Nút 2: Google Solitaire (Embedded) -->
+            <!-- Nút 2: Google Solitaire (Embedded) - Dùng logo Google và Best Choice -->
             <a href="https://tuanphong3108.github.io/solitaire/googlegame.html" 
-               class="game-button flex items-center p-5 rounded-xl text-left shadow-lg">
-                <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google Icon" class="w-10 h-10 object-contain mr-4 rounded-lg">
+               class="game-button primary-button-accent flex items-center p-5 rounded-2xl text-left shadow-2xl">
+                <!-- LOGO GOOGLE MỚI (W: 48px ~ w-12) -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png" alt="Google Icon" class="w-12 h-12 p-1.5 object-contain mr-4 rounded-xl bg-white/90">
                 <div class="flex-grow">
-                    <h2 class="text-xl font-bold">Google Solitaire</h2>
-                    <p class="text-sm text-gray-400">Phiên bản Solitaire kinh điển của Google.</p>
+                    <h2 class="text-2xl font-bold">Google Solitaire</h2>
+                    <p class="text-sm text-gray-300">Phiên bản Solitaire kinh điển của Google. <span class="font-semibold text-yellow-300">(BEST CHOICE! 🔥)</span></p>
                 </div>
-                <span class="material-symbols-outlined text-3xl accent-text">play_circle</span>
+                <span class="material-symbols-outlined text-4xl text-yellow-300">play_circle</span>
             </a>
             
-            <!-- Nút 3: Hướng Dẫn Chơi (MỚI) -->
+            <!-- Nút 3: Hướng Dẫn Chơi -->
             <a href="https://tuanphong3108.github.io/solitaire/how_to_play.html" 
                class="game-button flex items-center p-5 rounded-xl text-left shadow-lg">
                 <span class="material-symbols-outlined text-3xl accent-text mr-4">menu_book</span>
@@ -88,6 +121,7 @@
                     <h2 class="text-xl font-bold">Hướng Dẫn Chơi</h2>
                     <p class="text-sm text-gray-400">Luật chơi, các khu vực và mẹo chiến thắng.</p>
                 </div>
+                <span class="material-symbols-outlined text-3xl text-gray-400">arrow_forward</span>
             </a>
 
         </div>
