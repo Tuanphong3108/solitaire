@@ -10,6 +10,8 @@
     <link rel="manifest" href="manifest.json">
     <!-- Tải Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Material Symbols Outlined Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         /* --- M3 VIBE STYLING --- */
@@ -121,6 +123,18 @@
 
     <div id="game-container" class="w-full max-w-6xl p-4 bg-transparent rounded-xl">
         
+        <!-- Nút Tắt/Bật Tiếng (LOA) -->
+        <button 
+            id="mute-button"
+            onclick="toggleMute();"
+            class="absolute top-4 right-16 p-2 rounded-full text-xl font-bold cursor-pointer transition shadow-lg bg-gray-600 text-white hover:bg-gray-700 z-[1000]"
+            title="Tắt/Bật nhạc nền"
+        >
+            <span class="material-symbols-outlined" id="mute-icon">
+                volume_up
+            </span>
+        </button>
+
         <!-- Nút Đóng/Quay lại -->
         <!-- Thêm nút đóng game -->
         <button 
@@ -130,7 +144,7 @@
             title="Thoát game và quay lại trang chủ"
         >
             <span class="material-symbols-outlined">
-                x
+                close
             </span>
         </button>
 
@@ -226,6 +240,12 @@
 
     </div>
 
+    <!-- Audio Element cho nhạc nền (LOOP) -->
+    <audio id="background-music" loop>
+        <source src="https://tuanphong3108.github.io/solitaire/lakey_inspired_blue_boi_1796005994136508556.mp3" type="audio/mp3">
+        Trình duyệt của bạn không hỗ trợ thẻ audio.
+    </audio>
+
     <script>
         // --- 1. GAME CONSTANTS & DATA STRUCTURES ---
 
@@ -244,8 +264,13 @@
 
         let selectedCardIndex = -1; // Index lá bài được chọn trong cọc
         let selectedPileType = null; // 'tableau', 'waste', hoặc 'foundation'
-        let selectedPileIndex = -1; // Index cọc bài được chọn (0-6 cho tableau)
+        let selectedPileIndex = -1; // Index cọc bài được chọn (0-6 cho tableau), hoặc 'H','D','C','S' cho foundation
         let score = 0;
+        
+        // --- AUDIO VARIABLES ---
+        let bgMusic;
+        let muteIcon;
+
 
         // --- 2. CARD CLASS (Lớp Lá Bài) ---
 
@@ -340,6 +365,24 @@
 
         function hideExitModal() {
             exitModal.classList.add('hidden');
+        }
+        // ------------------------------------
+
+        // --- CHỨC NĂNG TẮT/BẬT TIẾNG (MỚI) ---
+        function toggleMute() {
+            if (!bgMusic || !muteIcon) return; // Bảo vệ
+
+            if (bgMusic.muted) {
+                bgMusic.muted = false;
+                muteIcon.textContent = 'volume_up';
+                showMessage('Bật nhạc nền! 🎶');
+                // Quan trọng: Phải gọi play() lần nữa nếu trước đó bị chặn
+                bgMusic.play().catch(e => console.error("Play failed after unmuting:", e)); 
+            } else {
+                bgMusic.muted = true;
+                muteIcon.textContent = 'volume_off';
+                showMessage('Tắt nhạc nền! 🔇');
+            }
         }
         // ------------------------------------
 
@@ -444,7 +487,7 @@
                     cardEl.style.zIndex = index;
                     
                     // Thêm lớp nếu là card đã chọn (và tất cả các card phía dưới nó)
-                    if (selectedPileType === 'tableau' && selectedPileIndex === pileIndex && index >= selectedCardIndex) {
+                    if (selectedPileType === 'tableau' && selectedPileIndex == pileIndex && index >= selectedCardIndex) {
                         cardEl.classList.add('selected');
                     }
                 } else {
@@ -594,8 +637,8 @@
                     return;
                 }
                 
-                else if (type === 'foundation' && cardIndex === gamePiles.foundations[index].length - 1) {
-                    // Không cho phép chọn từ Foundation
+                else if (type === 'foundation') {
+                    // Không cho phép chọn từ Foundation để di chuyển ra ngoài
                     showMessage('Không được di chuyển bài ra khỏi Foundation!');
                     return;
                 }
@@ -610,15 +653,17 @@
             else {
                 // Lấy các lá bài đang được chọn
                 let sourcePile;
+                let sourcePileOriginal; // Dùng để lật bài nếu nguồn là Tableau
                 let movedCards;
                 let scorePoints = 0;
+                let lậtBài = false;
 
                 if (selectedPileType === 'waste') {
                     sourcePile = gamePiles.waste;
                     movedCards = [sourcePile[sourcePile.length - 1]];
                 } else if (selectedPileType === 'tableau') {
-                    sourcePile = gamePiles.tableau[selectedPileIndex];
-                    movedCards = sourcePile.slice(selectedCardIndex);
+                    sourcePileOriginal = gamePiles.tableau[selectedPileIndex];
+                    movedCards = sourcePileOriginal.slice(selectedCardIndex);
                 } else {
                     // Trường hợp này không nên xảy ra
                     resetSelection();
@@ -634,12 +679,22 @@
                     if (isValidTableauMove(targetPile, movedCards)) {
                         targetPile.push(...movedCards);
                         // Xóa các lá đã di chuyển khỏi cọc nguồn
-                        sourcePile.splice(selectedCardIndex);
+                        if (selectedPileType === 'waste') {
+                            gamePiles.waste.pop();
+                        } else {
+                            sourcePileOriginal.splice(selectedCardIndex);
+                            // Kiểm tra lật bài cho Tableau nguồn
+                            if (sourcePileOriginal.length > 0 && !sourcePileOriginal[sourcePileOriginal.length - 1].isFaceUp) {
+                                sourcePileOriginal[sourcePileOriginal.length - 1].isFaceUp = true;
+                                scorePoints += 5; // Điểm lật bài
+                                lậtBài = true;
+                            }
+                        }
                         moveSuccessful = true;
                         
-                        // Tính điểm: Waste/Foundation -> Tableau (+5), Tableau -> Tableau (0)
+                        // Tính điểm: Waste -> Tableau (+5), Tableau -> Tableau (0)
                         if (selectedPileType === 'waste') {
-                            scorePoints = 5;
+                            scorePoints += 5;
                         }
                     } else {
                         showMessage('Không thể đặt bài ở đây! (Lệch màu hoặc thứ tự)');
@@ -651,10 +706,22 @@
                     // Chỉ được di chuyển 1 lá
                     if (movedCards.length === 1 && isValidFoundationMove(gamePiles.foundations[index], movedCards[0])) {
                         gamePiles.foundations[index].push(movedCards[0]);
+                        
                         // Xóa lá đã di chuyển khỏi cọc nguồn
-                        sourcePile.pop();
+                        if (selectedPileType === 'waste') {
+                            gamePiles.waste.pop();
+                        } else {
+                            sourcePileOriginal.pop();
+                            // Kiểm tra lật bài cho Tableau nguồn
+                            if (sourcePileOriginal.length > 0 && !sourcePileOriginal[sourcePileOriginal.length - 1].isFaceUp) {
+                                sourcePileOriginal[sourcePileOriginal.length - 1].isFaceUp = true;
+                                scorePoints += 5; // Điểm lật bài
+                                lậtBài = true;
+                            }
+                        }
+                        
                         moveSuccessful = true;
-                        scorePoints = 10; // Điểm khi di chuyển vào Foundation
+                        scorePoints += 10; // Điểm khi di chuyển vào Foundation
                     } else if (movedCards.length > 1) {
                         showMessage('Chỉ được di chuyển TỪNG LÁ MỘT vào Foundation!');
                     } else {
@@ -663,7 +730,7 @@
                 }
                 
                 // THAY ĐỔI CỌC ĐÍCH: Click lại vào lá đã chọn (hủy chọn)
-                else if (type === selectedPileType && index === selectedPileIndex && cardIndex >= selectedCardIndex) {
+                else if (type === selectedPileType && index == selectedPileIndex && cardIndex >= selectedCardIndex) {
                     resetSelection();
                     renderGame();
                     return;
@@ -673,16 +740,10 @@
                 // XỬ LÝ SAU KHI DI CHUYỂN THÀNH CÔNG
                 if (moveSuccessful) {
                     updateScore(scorePoints);
-                    showMessage('Nước đi hợp lệ! Go go go!');
-                    
-                    // Lật lá bài tiếp theo trong Tableau nếu cần
-                    if (selectedPileType === 'tableau' && sourcePile.length > 0) {
-                        const topCard = sourcePile[sourcePile.length - 1];
-                        if (!topCard.isFaceUp) {
-                            topCard.isFaceUp = true;
-                            updateScore(5); // Điểm lật bài
-                            showMessage('Đã lật bài mới (+5 điểm)!');
-                        }
+                    if (lậtBài) {
+                        showMessage('Nước đi hợp lệ! Đã lật bài mới (+5 điểm)!');
+                    } else {
+                        showMessage('Nước đi hợp lệ! Go go go!');
                     }
                 }
                 
@@ -699,15 +760,16 @@
             slot.addEventListener('click', () => {
                 if (gamePiles.tableau[index].length === 0 && selectedPileType) {
                     
-                    let sourcePile;
+                    let sourcePileOriginal; 
                     let movedCards;
-                    
+                    let scorePoints = 0;
+                    let lậtBài = false;
+
                     if (selectedPileType === 'waste') {
-                        sourcePile = gamePiles.waste;
-                        movedCards = [sourcePile[sourcePile.length - 1]];
+                        movedCards = [gamePiles.waste[gamePiles.waste.length - 1]];
                     } else if (selectedPileType === 'tableau') {
-                        sourcePile = gamePiles.tableau[selectedPileIndex];
-                        movedCards = sourcePile.slice(selectedCardIndex);
+                        sourcePileOriginal = gamePiles.tableau[selectedPileIndex];
+                        movedCards = sourcePileOriginal.slice(selectedCardIndex);
                     } else {
                         resetSelection();
                         renderGame();
@@ -717,19 +779,25 @@
                     // Nếu cọc trống, chỉ được đặt Vua (K)
                     if (movedCards[0].rank === 'K') {
                         gamePiles.tableau[index].push(...movedCards);
-                        sourcePile.splice(selectedCardIndex);
                         
-                        // Lật bài nguồn nếu cần (giống logic trên)
-                        if (selectedPileType === 'tableau' && sourcePile.length > 0) {
-                            const topCard = sourcePile[sourcePile.length - 1];
-                            if (!topCard.isFaceUp) {
-                                topCard.isFaceUp = true;
-                                updateScore(5); 
+                        if (selectedPileType === 'waste') {
+                            gamePiles.waste.pop();
+                        } else {
+                            sourcePileOriginal.splice(selectedCardIndex);
+                            // Kiểm tra lật bài cho Tableau nguồn
+                            if (sourcePileOriginal.length > 0 && !sourcePileOriginal[sourcePileOriginal.length - 1].isFaceUp) {
+                                sourcePileOriginal[sourcePileOriginal.length - 1].isFaceUp = true;
+                                scorePoints += 5; // Điểm lật bài
+                                lậtBài = true;
                             }
                         }
 
-                        updateScore(5); // Điểm khi đặt Vua vào cọc trống
-                        showMessage('Đặt Vua hợp lệ!');
+                        updateScore(5 + scorePoints); // Điểm khi đặt Vua vào cọc trống
+                        if (lậtBài) {
+                            showMessage('Đặt Vua hợp lệ! Đã lật bài mới (+5 điểm)!');
+                        } else {
+                            showMessage('Đặt Vua hợp lệ!');
+                        }
                         resetSelection();
                         renderGame();
                         return;
@@ -739,6 +807,61 @@
                 }
                 
                 // Nếu click vào slot rỗng mà không có bài được chọn, reset selection
+                resetSelection();
+                renderGame();
+            });
+        });
+        
+        // --- XỬ LÝ CLICK VÀO SLOT FOUNDATION RỖNG (MỚI) ---
+        document.querySelectorAll('.foundation-slot').forEach((slot) => {
+            slot.addEventListener('click', (e) => {
+                const targetSuit = slot.getAttribute('data-suit');
+                const targetPile = gamePiles.foundations[targetSuit];
+
+                // Chỉ xử lý nếu slot rỗng VÀ đang có bài được chọn
+                if (targetPile.length === 0 && selectedPileType) {
+                    
+                    let sourcePileOriginal;
+                    let movedCards;
+                    
+                    if (selectedPileType === 'waste') {
+                        movedCards = [gamePiles.waste[gamePiles.waste.length - 1]];
+                    } else if (selectedPileType === 'tableau') {
+                        sourcePileOriginal = gamePiles.tableau[selectedPileIndex];
+                        movedCards = sourcePileOriginal.slice(selectedCardIndex);
+                    } else {
+                        resetSelection();
+                        renderGame();
+                        return;
+                    }
+
+                    // Chỉ được di chuyển 1 lá Át (A)
+                    if (movedCards.length === 1 && movedCards[0].rank === 'A' && movedCards[0].suit === targetSuit) {
+                        
+                        gamePiles.foundations[targetSuit].push(movedCards[0]);
+                        
+                        // Xóa bài nguồn
+                        if (selectedPileType === 'waste') {
+                            gamePiles.waste.pop();
+                        } else {
+                            sourcePileOriginal.pop();
+                            // Kiểm tra lật bài cho Tableau nguồn
+                            if (sourcePileOriginal.length > 0 && !sourcePileOriginal[sourcePileOriginal.length - 1].isFaceUp) {
+                                sourcePileOriginal[sourcePileOriginal.length - 1].isFaceUp = true;
+                                updateScore(5); 
+                            }
+                        }
+
+                        updateScore(10); // Điểm khi đặt Át vào Foundation
+                        showMessage(`Át ${targetSuit} đã vào Foundation! (+10 điểm)`);
+                        resetSelection();
+                        renderGame();
+                        return;
+                    } else {
+                        showMessage('Chỉ được đặt Át cùng chất vào Foundation rỗng!');
+                    }
+                }
+                
                 resetSelection();
                 renderGame();
             });
@@ -758,7 +881,23 @@
         }
         
         // Bắt đầu game khi tải trang
-        window.onload = initGame;
+        window.onload = () => {
+            // Khởi tạo Audio và cố gắng tự động phát (ở trạng thái tắt tiếng)
+            bgMusic = document.getElementById('background-music');
+            muteIcon = document.getElementById('mute-icon');
+            
+            // Tự động tắt tiếng và play để chuẩn bị cho user tương tác
+            bgMusic.muted = true;
+            bgMusic.play().catch(e => {
+                 console.log("Music blocked by browser policy. User must interact to play.");
+                 // Giữ trạng thái mute_off nếu không play được, để user click lần đầu sẽ bật (unmute)
+                 muteIcon.textContent = 'volume_off'; 
+                 bgMusic.muted = true; // Đảm bảo mute_off
+            });
+            
+            // Bắt đầu game
+            initGame();
+        };
 
     </script>
 </body>
