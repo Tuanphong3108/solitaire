@@ -4,15 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solitaire Hub | MD3 Expressive 2026</title>
-    
+
+    <!-- [MỚI] PWA Manifest & Theme Color cho Android -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1c1e">
+
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <style>
         @font-face {
             font-family: 'Minecraft';
@@ -156,7 +160,7 @@
 
         <!-- Grid Cards -->
         <div class="grid gap-6">
-            
+
             <!-- Game 1: Standard Edition -->
             <a href="https://tuanphong3108.github.io/solitaire/game.html" class="expressive-card p-6 flex items-center group">
                 <div class="bg-[#2c313a] w-16 h-16 rounded-[24px] flex items-center justify-center mr-6 group-hover:bg-[#a0ccff] transition-colors duration-300">
@@ -223,6 +227,15 @@
     </div>
 
     <script>
+        // [MỚI] Đăng ký Service Worker cho PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('✅ PWA: Service Worker Registered!', reg.scope))
+                    .catch(err => console.error('❌ PWA: Service Worker Registration Failed!', err));
+            });
+        }
+
         // Xử lý hiệu ứng biến mất của Loading Overlay
         window.addEventListener('load', () => {
             const loader = document.getElementById('loading-overlay');
@@ -246,3 +259,4 @@
     </script>
 </body>
 </html>
+
