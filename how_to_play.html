@@ -3,189 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hướng Dẫn Chơi Solitaire</title>
-     <!-- Favicon cho bản Public (ĐÃ SỬA VÀ DÙNG ĐƯỜNG DẪN TUYỆT ĐỐI) -->
-    <link rel="icon" href="https://tuanphong3108.github.io/solitaire/icon.png" type="image/png">
-    <!-- PWA Manifest Link (ĐÃ THÊM VÀ DÙNG ĐƯỜNG DẪN TUYỆT ĐỐI) -->
-    <link rel="manifest" href="https://tuanphong3108.github.io/solitaire/manifest.json">
-    <!-- Tải Tailwind CSS CDN -->
+    <title>Hướng Dẫn | Solitaire Hub 2026</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tải Material Symbols Outlined Font -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* Thiết lập màu sắc M3 Dark Mode */
-        :root {
-            --surface: #1a1c20;
-            --on-surface: #e6e1e6;
-            --primary: #60c9ff;
-            --primary-container: rgba(96, 201, 255, 0.15); /* Nền container mới */
-            --on-primary: #1a1c20;
-        }
-        body {
-            background-color: var(--surface);
-            color: var(--on-surface);
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            padding: 20px;
-            /* THÊM HIỆU ỨNG FADE-IN */
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
-        }
-        /* Class sẽ được thêm bằng JS sau khi load xong */
-        body.loaded {
-            opacity: 1;
+        @font-face {
+            font-family: 'Minecraft';
+            src: url('https://tuanphong3108.github.io/google-sans-do-not-access/minecraft.ttf') format('truetype');
+            font-weight: normal; 
+            font-style: normal;
         }
 
-        h1 {
-            color: var(--primary);
+        :root {
+            --md-sys-color-primary: #a0ccff;
+            --md-sys-color-surface: #1a1c1e;
+            --md-sys-color-on-surface: #e2e2e6;
+            --md-sys-color-surface-variant: #43474e;
+            --md-sys-color-on-surface-variant: #c3c7cf;
         }
-        /* Cập nhật style cho các thẻ nội dung */
-        .section-card {
-            background-color: #2c2f35;
-            border: 1px solid rgba(96, 201, 255, 0.2); /* Viền accent nhẹ */
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        body {
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-family: 'Google Sans Flex', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
-        .section-card:hover {
-            background-color: #35383f; /* Đổi màu nền khi hover */
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.6);
+
+        .mc-font {
+            font-family: 'Minecraft', monospace;
+            letter-spacing: 1px;
         }
+
+        /* Expressive Container */
+        .expressive-section {
+            background: linear-gradient(145deg, #252a30, #1c2024);
+            border-radius: 32px;
+            border: 1px solid rgba(160, 204, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        /* Material Symbols Fill on Hover */
+        .symbol-icon {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 40px;
+        }
+
+        /* Custom Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--md-sys-color-surface);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        #loading-overlay img {
+            width: 120px; 
+            height: auto; 
+            filter: hue-rotate(185deg) brightness(1.2) contrast(1.1); 
+            mix-blend-mode: screen; 
+        }
+
         .anchor-link {
-            color: var(--primary);
-            font-weight: 600;
+            color: var(--md-sys-color-primary);
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 16px;
+            background: rgba(160, 204, 255, 0.05);
+            transition: background 0.2s ease;
         }
-        /* Style cho tiêu đề phụ */
+        .anchor-link:hover {
+            background: rgba(160, 204, 255, 0.15);
+        }
+
         .sub-heading {
-            color: var(--primary); /* Màu xanh accent */
-            padding: 0.5rem 0.75rem;
-            background-color: var(--primary-container); /* Nền xanh nhẹ */
+            background: #004a75;
+            color: #d1e4ff;
+            padding: 4px 16px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 700;
             display: inline-block;
-            border-radius: 0.5rem;
+            margin-bottom: 12px;
+        }
+
+        /* Scroll Smooth */
+        html {
+            scroll-behavior: smooth;
         }
     </style>
 </head>
-<body id="main-body">
-    <div class="max-w-4xl mx-auto py-8">
-        
-        <!-- Header và Nút Thoát -->
-        <div class="flex justify-between items-center mb-10">
-            <h1 class="text-4xl font-extrabold flex items-center">
-                <span class="material-symbols-outlined mr-3 text-5xl">menu_book</span>
-                SOLITAIRE: Hướng Dẫn Chơi
-            </h1>
-            <!-- Nút Thoát về Hub - Đã dùng icon 'close' -->
-            <a href="https://tuanphong3108.github.io/solitaire/index.html" 
-               class="flex items-center space-x-2 text-white px-4 py-2 bg-red-600 rounded-full hover:bg-red-500 transition shadow-lg">
-                <span class="material-symbols-outlined">close</span>
-                <span>Thoát</span>
-            </a>
-        </div>
+<body class="min-h-screen p-6 md:p-12">
 
-        <!-- Mục Lục -->
-        <div class="p-6 section-card rounded-xl mb-12">
-            <h2 class="text-2xl font-bold mb-4 text-white">Mục Lục</h2>
-            <ul class="list-disc ml-5 space-y-2 text-gray-300">
-                <li><a href="#luat-chinh" class="anchor-link">Luật Chơi Cơ Bản: Mục tiêu và Bộ Bài</a></li>
-                <li><a href="#vung-choi" class="anchor-link">Các Khu Vực Trong Game: Tableau, Foundation, Stock, Waste</a></li>
-                <li><a href="#quy-tac-chuyen" class="anchor-link">Quy Tắc Di Chuyển Bài: Từ Tableau đến Foundation</a></li>
-                <li><a href="#chien-thang" class="anchor-link">Chiến Lược Chiến Thắng</a></li>
-            </ul>
-        </div>
-        
-        <!-- Phần 1: Luật Chơi Cơ Bản -->
-        <div id="luat-chinh" class="section-card p-6 rounded-xl mb-8">
-            <h2 class="text-3xl font-bold mb-4 text-white">1. Luật Chơi Cơ Bản</h2>
-            <p class="mb-4 text-lg">Solitaire (hay Klondike) là trò chơi xếp bài một người chơi. Mục tiêu là sắp xếp toàn bộ 52 lá bài theo thứ tự từ Át (A) đến Già (K) và theo cùng một chất vào 4 cọc <strong>Foundation</strong>.</p>
-            
-            <h3 class="text-xl font-semibold mt-6 mb-3 sub-heading">Bộ Bài</h3>
-            <p class="text-gray-300">Sử dụng bộ bài 52 lá tiêu chuẩn, không có Joker.</p>
-            
-            <h3 class="text-xl font-semibold mt-6 mb-3 sub-heading">Mục tiêu Cuối cùng</h3>
-            <p class="text-gray-300">Chuyển tất cả 52 lá bài lên 4 cọc Foundation, mỗi cọc một chất (Cơ, Rô, Chuồn, Bích), bắt đầu bằng Át (A) và kết thúc bằng Già (K).</p>
-        </div>
-
-        <!-- Phần 2: Các Khu Vực Trong Game -->
-        <div id="vung-choi" class="section-card p-6 rounded-xl mb-8">
-            <h2 class="text-3xl font-bold mb-4 text-white">2. Các Khu Vực Trong Game</h2>
-            
-            <p class="mb-6 text-gray-300">Sân chơi Solitaire được chia làm 4 khu vực chính:</p>
-            
-            <!-- ẢNH SƠ ĐỒ THỰC TẾ -->
-            <img src="https://tuanphong3108.github.io/solitaire/solitaire_map_google.png" alt="Sơ đồ bố cục game Solitaire" class="w-full h-auto rounded-lg my-4 border-4 border-primary">
-            <!-- Ảnh minh họa thực tế Solitaire -->
-            
-
-            <ul class="space-y-4 text-gray-300">
-                 <li class="p-3 bg-gray-700/30 rounded-lg">
-                    <strong class="text-primary block mb-1">a. Waste (Cọc Lật):</strong> 
-                    <span class="text-white">Các lá bài được rút từ Stock sẽ được lật ngửa và đặt ở đây. Chỉ lá bài trên cùng của Waste mới được sử dụng.</span>
-                </li>
-                <li class="p-3 bg-gray-700/30 rounded-lg">
-                    <strong class="text-primary block mb-1">b. Tableau (7 Cọc Chính):</strong> 
-                    <span class="text-white">Khu vực chơi chính, có 7 cọc bài được chia từ 1 đến 7 lá. Lá bài cuối cùng của mỗi cọc luôn được lật ngửa.</span>
-                </li>
-                <li class="p-3 bg-gray-700/30 rounded-lg">
-                    <strong class="text-primary block mb-1">c. Stock (Cọc Rút):</strong> 
-                    <span class="text-white">Những lá bài còn lại sau khi chia bài vào Tableau. Bạn rút bài từ đây để chơi.</span>
-                </li>
-                   <li class="p-3 bg-gray-700/30 rounded-lg">
-                    <strong class="text-primary block mb-1">d. Foundation (4 Cọc Mục Tiêu):</strong> 
-                    <span class="text-white">4 ô trống ở trên cùng bên phải. Nơi bạn xây dựng 4 chất bài (Cơ, Rô, Chuồn, Bích) theo thứ tự tăng dần từ A đến K.</span>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Phần 3: Quy Tắc Di Chuyển Bài -->
-        <div id="quy-tac-chuyen" class="section-card p-6 rounded-xl mb-8">
-            <h2 class="text-3xl font-bold mb-4 text-white">3. Quy Tắc Di Chuyển Bài</h2>
-            
-            <ul class="space-y-4 text-gray-300">
-                <li class="p-3 bg-gray-700/30 rounded-lg">
-                    <strong class="text-primary block mb-1">Tableau → Tableau:</strong> 
-                    <span class="text-white">Chuyển bài theo thứ tự <strong>giảm dần</strong> và <strong>khác màu</strong> (Đen → Đỏ, Đỏ → Đen). Bạn có thể di chuyển một lá hoặc một chuỗi các lá bài đã được lật ngửa.</span>
-                    <p class="text-sm italic mt-1 text-gray-400">Ví dụ: Đặt lá Q (Đỏ) lên lá K (Đen).</p>
-                </li>
-                <li class="p-3 bg-gray-700/30 rounded-lg">
-                    <strong class="text-primary block mb-1">Tableau Rỗng:</strong> 
-                    <span class="text-white">Nếu một cọc Tableau bị trống, bạn <strong>chỉ được phép</strong> đặt lá <strong>Già (K)</strong> vào đó.</span>
-                </li>
-                <li class="p-3 bg-gray-700/30 rounded-lg">
-                    <strong class="text-primary block mb-1">Waste/Tableau → Foundation:</strong> 
-                    <span class="text-white">Chuyển bài theo thứ tự <strong>tăng dần</strong> và <strong>cùng chất</strong> (ví dụ: A → 2 → 3 của chất Cơ).</span>
-                    <p class="text-sm italic mt-1 text-gray-400">Lá đầu tiên phải là Át (A).</p>
-                </li>
-                <li class="p-3 bg-gray-700/30 rounded-lg">
-                    <strong class="text-primary block mb-1">Rút Bài:</strong> 
-                    <span class="text-white">Click vào cọc Stock để lật một lá bài sang Waste. Khi Stock hết, bạn có thể <strong>tái chế</strong> bài từ Waste về Stock (lật úp lại).</span>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Phần 4: Làm Thế Nào Để Thắng? -->
-        <div id="chien-thang" class="section-card p-6 rounded-xl mb-8">
-            <h2 class="text-3xl font-bold mb-4 text-white">4. Làm Thế Nào Để Thắng?</h2>
-            <p class="mb-4 text-lg">Bạn chiến thắng khi tất cả 52 lá bài được chuyển thành công lên 4 cọc Foundation (Mỗi cọc có A, 2, 3, ... , K cùng chất).</p>
-            
-            <h3 class="text-xl font-semibold mt-6 mb-3 sub-heading">Chiến Lược Mẹo Nâng Cao</h3>
-            <ul class="list-disc ml-5 space-y-2 text-gray-300">
-                <li><span class="text-white font-medium">Luôn cố gắng <strong>lật ngửa</strong> càng nhiều lá bài úp trong Tableau càng tốt. Đó là chìa khóa để mở khóa game.</span></li>
-                <li><span class="text-white font-medium">Không di chuyển bài lên Foundation quá sớm nếu bạn cần lá bài đó để lật lá bài úp trong Tableau. Hãy ưu tiên khu vực chơi chính.</span></li>
-                <li><span class="text-white font-medium">Ưu tiên chuyển <strong>Già (K)</strong> vào các cột Tableau rỗng. Đây là nước đi "giải phóng không gian" quan trọng.</span></li>
-            </ul>
-        </div>
-        
-        <!-- Footer MỚI: Chúc người chơi vui vẻ -->
-        <div class="border-t border-gray-700 pt-6 text-center">
-             <p class="text-gray-500 text-sm">Chúc người chơi có một khoảng thời gian thư giãn vui vẻ!</p>
-        </div>
-
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <img src="https://tuanphong3108.github.io/md3-loading/Loading_Indicator.gif" alt="Loading...">
+        <p class="mc-font mt-2 text-[10px] tracking-[4px] opacity-40 uppercase">Loading Manual...</p>
     </div>
 
-    <!-- Script FADE-IN -->
+    <div class="max-w-3xl mx-auto">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-12">
+            <div class="flex items-center gap-4">
+                <div class="bg-[#004a75] p-3 rounded-2xl shadow-lg">
+                    <span class="material-symbols-outlined text-3xl text-[#a0ccff]">menu_book</span>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight uppercase">Hướng Dẫn</h1>
+            </div>
+            <a href="https://tuanphong3108.github.io/solitaire/index.html" class="bg-red-900/30 text-red-300 p-3 rounded-full hover:bg-red-800/50 transition-all flex items-center justify-center">
+                <span class="material-symbols-outlined">close</span>
+            </a>
+        </header>
+
+        <!-- Mục Lục -->
+        <section class="expressive-section p-8 mb-8">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#a0ccff]">list_alt</span> Nội dung chính
+            </h2>
+            <nav class="grid gap-3">
+                <a href="#luat-chinh" class="anchor-link text-sm">
+                    <span class="material-symbols-outlined text-xs">arrow_forward</span> Luật Chơi Cơ Bản
+                </a>
+                <a href="#vung-choi" class="anchor-link text-sm">
+                    <span class="material-symbols-outlined text-xs">arrow_forward</span> Bố Cục Sân Chơi (a, b, c, d)
+                </a>
+                <a href="#quy-tac-chuyen" class="anchor-link text-sm">
+                    <span class="material-symbols-outlined text-xs">arrow_forward</span> Quy Tắc Di Chuyển
+                </a>
+                <a href="#chien-thang" class="anchor-link text-sm">
+                    <span class="material-symbols-outlined text-xs">arrow_forward</span> Chiến Thuật 2026
+                </a>
+            </nav>
+        </section>
+
+        <!-- Content Sections -->
+        <div class="space-y-8">
+            
+            <!-- Phần 1 -->
+            <article id="luat-chinh" class="expressive-section p-8">
+                <span class="sub-heading mc-font uppercase">01 / Cơ Bản</span>
+                <h2 class="text-2xl font-black mb-4">Luật Chơi Klondike</h2>
+                <p class="text-gray-400 leading-relaxed mb-6 italic">
+                    Solitaire (Klondike) là trò chơi xếp bài rèn luyện tư duy. Mục tiêu là chuyển toàn bộ 52 lá bài lên 4 cọc Foundation theo thứ tự từ A đến K.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                        <p class="font-bold text-[10px] mb-2 uppercase text-[#a0ccff] mc-font">Bộ bài</p>
+                        <p class="text-sm">52 lá tiêu chuẩn, không sử dụng Joker.</p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                        <p class="font-bold text-[10px] mb-2 uppercase text-[#a0ccff] mc-font">Mục tiêu</p>
+                        <p class="text-sm">Xây dựng 4 cọc bài cùng chất (Cơ, Rô, Chuồn, Bích).</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Phần 2 -->
+            <article id="vung-choi" class="expressive-section p-8">
+                <span class="sub-heading mc-font uppercase">02 / Bố Cục</span>
+                <h2 class="text-2xl font-black mb-4">Các Khu Vực Trên Sân</h2>
+                
+                <!-- ẢNH SƠ ĐỒ -->
+                <div class="relative overflow-hidden rounded-2xl mb-8 border-4 border-[#004a75] shadow-2xl">
+                    <img src="https://tuanphong3108.github.io/solitaire/solitaire_map_google.png" alt="Sơ đồ bố cục" class="w-full h-auto">
+                </div>
+
+                <!-- Chú thích theo a, b, c, d -->
+                <div class="space-y-4">
+                    <div class="flex gap-4 p-5 bg-white/5 rounded-3xl border border-white/5">
+                        <div class="bg-[#a0ccff] text-[#003354] font-black w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mc-font text-xl">a</div>
+                        <div>
+                            <p class="font-bold text-white uppercase text-sm mb-1">Waste (Cọc Lật)</p>
+                            <p class="text-sm text-gray-400">Các lá bài được rút từ Stock sẽ hiển thị tại đây. Chỉ lá bài trên cùng mới có thể sử dụng.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white/5 rounded-3xl border border-white/5">
+                        <div class="bg-[#a0ccff] text-[#003354] font-black w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mc-font text-xl">b</div>
+                        <div>
+                            <p class="font-bold text-white uppercase text-sm mb-1">Tableau (7 Cọc Chính)</p>
+                            <p class="text-sm text-gray-400">Khu vực xếp bài xen kẽ màu. Lá bài cuối cùng của mỗi cọc luôn được lật ngửa để chơi.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white/5 rounded-3xl border border-white/5">
+                        <div class="bg-[#a0ccff] text-[#003354] font-black w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mc-font text-xl">c</div>
+                        <div>
+                            <p class="font-bold text-white uppercase text-sm mb-1">Stock (Cọc Rút)</p>
+                            <p class="text-sm text-gray-400">Cọc bài úp còn lại. Nhấn vào đây để rút bài mới và đưa vào cọc Waste.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white/5 rounded-3xl border border-white/5">
+                        <div class="bg-[#a0ccff] text-[#003354] font-black w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mc-font text-xl">d</div>
+                        <div>
+                            <p class="font-bold text-white uppercase text-sm mb-1">Foundation (Cọc Mục Tiêu)</p>
+                            <p class="text-sm text-gray-400">Nơi xếp bài từ A đến K theo cùng chất. Đưa được đủ 52 lá lên đây là bạn thắng.</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Phần 3 -->
+            <article id="quy-tac-chuyen" class="expressive-section p-8">
+                <span class="sub-heading mc-font uppercase">03 / Quy Tắc</span>
+                <h2 class="text-2xl font-black mb-4">Quy Định Di Chuyển</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-4 bg-white/5 p-4 rounded-2xl">
+                        <span class="material-symbols-outlined text-[#a0ccff] mt-1">swap_vert</span>
+                        <p class="text-sm text-gray-400 leading-relaxed"><strong class="text-white">Tableau:</strong> Xếp bài giảm dần và <span class="text-[#a0ccff] font-bold">khác màu</span> (ví dụ: Đầm Đỏ lên Già Đen).</p>
+                    </li>
+                    <li class="flex items-start gap-4 bg-white/5 p-4 rounded-2xl">
+                        <span class="material-symbols-outlined text-[#a0ccff] mt-1">king_bed</span>
+                        <p class="text-sm text-gray-400 leading-relaxed"><strong class="text-white">Cọc Trống:</strong> Chỉ có thể đặt lá <span class="text-[#a0ccff] font-bold">Già (K)</span> vào vị trí cọc Tableau bị trống.</p>
+                    </li>
+                    <li class="flex items-start gap-4 bg-white/5 p-4 rounded-2xl">
+                        <span class="material-symbols-outlined text-[#a0ccff] mt-1">published_with_changes</span>
+                        <p class="text-sm text-gray-400 leading-relaxed"><strong class="text-white">Tái Chế:</strong> Khi cọc Stock hết, bạn có thể lật ngược lại toàn bộ cọc Waste để tiếp tục rút.</p>
+                    </li>
+                </ul>
+            </article>
+
+            <!-- Phần 4 -->
+            <article id="chien-thang" class="expressive-section p-8 border-2 border-[#a0ccff]/20">
+                <span class="sub-heading mc-font uppercase">04 / Mẹo 2026</span>
+                <h2 class="text-2xl font-black mb-4">Chiến Thuật Vượt Màn</h2>
+                <div class="p-6 bg-[#a0ccff]/5 rounded-3xl border border-[#a0ccff]/10">
+                    <p class="text-sm italic text-gray-300 leading-relaxed">
+                        "Đừng quá vội vàng đưa bài lên cọc Foundation (d). Hãy giữ lại các lá bài nhỏ ở Tableau (b) nếu chúng có thể giúp bạn lật mở những lá bài úp bí ẩn phía dưới. Giải phóng không gian là ưu tiên số 1!"
+                    </p>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-16 text-center pb-12 opacity-30">
+            <p class="text-[9px] mc-font tracking-[0.3em] uppercase">Solitaire Hub Documentation</p>
+            <p class="text-[10px] mt-1">Dữ liệu được cập nhật cho phiên bản 2026</p>
+        </footer>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            document.getElementById('main-body').classList.add('loaded');
+        // Loading Overlay Logic
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loading-overlay');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500);
+            }, 600);
+        });
+
+        // Haptic Feedback for Links
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('touchstart', () => {
+                if ('vibrate' in navigator) navigator.vibrate(10);
+            });
         });
     </script>
 </body>
